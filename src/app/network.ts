@@ -1,18 +1,21 @@
-import { Node, Edge, Network } from 'vis-network';
+import { Edge, Network } from 'vis-network';
+import { MyNode } from './my-node';
 import { DataSet } from 'vis-data';
 import { LittlesisService } from './littlesis.service';
 import { Connection } from './connection';
+import { Entity } from './entity';
 
 export class LittleSisNetwork {
   service = new LittlesisService();
-  nodeDataSet = new DataSet<Node>();
+  nodeDataSet = new DataSet<MyNode>();
   edgeDataSet = new DataSet<Edge>();
   network?: Network;
   nextNodeId = 0;
   nextEdgeId = 0;
 
   constructor(container: HTMLElement) {
-    this.populateNetwork();
+    // start with elon musk for now
+    this.populateNetwork(38805);
     var options = {
       interaction: {
         hover: true,
@@ -41,27 +44,9 @@ export class LittleSisNetwork {
     });
     network.on('selectNode', function (params: any) {
       console.log('selectNode event:', params);
+      console.log(params.pointer.canvas.x);
       let id = params.nodes[0];
-      that.nodeDataSet?.add([
-        {
-          id: ++that.nextNodeId,
-          label: `Node ${that.nextNodeId}`,
-          title: `I am node ${that.nextNodeId}!`,
-        },
-        {
-          id: ++that.nextNodeId,
-          label: `Node ${that.nextNodeId}`,
-          title: `I am node ${that.nextNodeId}!`,
-        },
-        { id: ++that.nextNodeId, label: `Node ${that.nextNodeId}` },
-        { id: ++that.nextNodeId, label: `Node ${that.nextNodeId}` },
-      ]);
-      that.edgeDataSet?.add([
-        { id: ++that.nextEdgeId, from: id, to: that.nextNodeId - 3 },
-        { id: ++that.nextEdgeId, from: id, to: that.nextNodeId - 2 },
-        { id: ++that.nextEdgeId, from: id, to: that.nextNodeId - 1 },
-        { id: ++that.nextEdgeId, from: id, to: that.nextNodeId },
-      ]);
+      that.populateNetwork(id);
     });
     network.on('dragStart', function (params: any) {
       console.log('dragStart Event:', params);
@@ -84,32 +69,66 @@ export class LittleSisNetwork {
     });
   }
 
-  populateNetwork() {
-    this.service.getEntityById(38805).then((entity) => {
-      let node = {
-        id: entity.id,
-        label: entity.name,
-        title: entity.blurb,
-      };
-      this.nodeDataSet.add(node);
-    });
-    this.service.getConnectionsByEntityId(38805).then((connections) => {
-      let nodes = connections.map((c: Connection) => {
-        return {
-          id: c.entity.id,
-          label: c.entity.name,
-          title: c.entity.blurb,
-        };
+  populateNetwork(id: number) {
+    let parent = this.nodeDataSet.get(id);
+    if (parent?.populated) {
+      console.log('already populated');
+      return;
+    }
+    if (!parent) {
+      this.service.getEntityById(id).then((entity) => {
+        let node = this.createNode(entity, true, true);
+        this.nodeDataSet.add(node);
       });
-      let edges = connections.map((c: Connection) => {
-        return {
-          id: c.connection_id,
-          from: c.parent_id,
-          to: c.entity.id,
-        };
-      });
+    } else {
+      parent.populated = true;
+      parent.expanded = true;
+      this.nodeDataSet.update(parent);
+    }
+    this.service.getConnectionsByEntityId(id).then((connections) => {
+      let nodeIds = this.nodeDataSet.getIds();
+      let nodes = connections
+        .filter((c: Connection) => !nodeIds.includes(c.entity.id))
+        .map((c: Connection) => {
+          return this.createNode(c.entity);
+        });
+      let edgeIds = this.edgeDataSet.getIds();
+      let edges = connections
+        .filter((c: Connection) => !edgeIds.includes(c.connection_id))
+        .map((c: Connection) => {
+          return {
+            id: c.connection_id,
+            from: c.parent_id,
+            to: c.entity.id,
+            color: this.getEdgeColor(c.connection_category),
+            width: 4,
+          };
+        });
       this.nodeDataSet.add(nodes);
       this.edgeDataSet.add(edges);
     });
+  }
+
+  createNode(entity: Entity, populated = false, expanded = false): MyNode {
+    return {
+      id: entity.id,
+      label: entity.name,
+      title: entity.blurb,
+      color: entity.types[0] === 'Person' ? '#66B3BA' : '#9AB87A',
+      populated: populated,
+      expanded: expanded,
+    };
+  }
+
+  getEdgeColor(category: number): string {
+    let color = '#76957E';
+    if (category === 1) color = '#69951E';
+    if (category === 2) color = '#F9CFF2';
+    if (category === 3) color = '#E09F3E';
+    if (category === 4) color = '#7C98B3';
+    if (category === 5) color = '#DEDBCA';
+    if (category === 7) color = '#C7403B';
+    if (category === 8) color = '#536B78';
+    return color;
   }
 }

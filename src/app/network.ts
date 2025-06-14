@@ -1,7 +1,10 @@
 import { Node, Edge, Network } from 'vis-network';
 import { DataSet } from 'vis-data';
+import { LittlesisService } from './littlesis.service';
+import { Connection } from './connection';
 
 export class LittleSisNetwork {
+  service = new LittlesisService();
   nodeDataSet = new DataSet<Node>();
   edgeDataSet = new DataSet<Edge>();
   network?: Network;
@@ -82,31 +85,31 @@ export class LittleSisNetwork {
   }
 
   populateNetwork() {
-    var nodes = [
-      {
-        id: ++this.nextNodeId,
-        label: `Node ${this.nextNodeId}`,
-        title: `I am node ${this.nextNodeId}!`,
-      },
-      {
-        id: ++this.nextNodeId,
-        label: `Node ${this.nextNodeId}`,
-        title: `I am node ${this.nextNodeId}!`,
-      },
-      { id: ++this.nextNodeId, label: `Node ${this.nextNodeId}` },
-      { id: ++this.nextNodeId, label: `Node ${this.nextNodeId}` },
-      { id: ++this.nextNodeId, label: `Node ${this.nextNodeId}` },
-    ];
-
-    // create an array with edges
-    var edges = [
-      { id: ++this.nextEdgeId, from: 1, to: 3 },
-      { id: ++this.nextEdgeId, from: 1, to: 2 },
-      { id: ++this.nextEdgeId, from: 2, to: 4 },
-      { id: ++this.nextEdgeId, from: 2, to: 5 },
-    ];
-
-    this.nodeDataSet?.add(nodes);
-    this.edgeDataSet?.add(edges);
+    this.service.getEntityById(38805).then((entity) => {
+      let node = {
+        id: entity.id,
+        label: entity.name,
+        title: entity.blurb,
+      };
+      this.nodeDataSet.add(node);
+    });
+    this.service.getConnectionsByEntityId(38805).then((connections) => {
+      let nodes = connections.map((c: Connection) => {
+        return {
+          id: c.entity.id,
+          label: c.entity.name,
+          title: c.entity.blurb,
+        };
+      });
+      let edges = connections.map((c: Connection) => {
+        return {
+          id: c.connection_id,
+          from: c.parent_id,
+          to: c.entity.id,
+        };
+      });
+      this.nodeDataSet.add(nodes);
+      this.edgeDataSet.add(edges);
+    });
   }
 }

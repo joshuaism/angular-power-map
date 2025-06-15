@@ -1,28 +1,31 @@
 import { Component, input, OnInit } from '@angular/core';
 import { LittleSisNetwork } from '../network';
 import { Relationship } from '../relationship';
-import { MyNode } from '../my-node';
 
 @Component({
   selector: 'app-relationship-details',
   imports: [],
   template: `
-    <h3>{{ getCategory() }}</h3>
-    <p>{{ relationship().description }}</p>
-    <p (click)="focus(relationship().entity1.id)">
-      {{ relationship().description1 }}: {{ relationship().entity1.name }}
-    </p>
-    <p (click)="focus(relationship().entity2.id)">
-      {{ relationship().description2 }}:{{ relationship().entity2.name }}
-    </p>
-    <p>{{ relationship().start_date }} &ndash; {{ relationship().end_date }}</p>
-    @if (relationship().goods) {
-    <p style="color:red">has goods!</p>
-    } @if (relationship().category_attributes) {
-    <p style="color:red">has category attributes!</p>
-    }
-    <p>last updated: {{ relationship().updated_at }}</p>
-    <a href="{{ relationship().link }}" target="_blank">source</a>
+    <div class="scrollable">
+      <h3>{{ getCategory() }}</h3>
+      <p>{{ relationship().description }}</p>
+      <p (click)="focus(relationship().entity1.id)">
+        {{ relationship().entity1.name }}: {{ relationship().description1 }}
+      </p>
+      <p (click)="focus(relationship().entity2.id)">
+        {{ relationship().entity2.name }}: {{ relationship().description2 }}
+      </p>
+      <p>
+        {{ relationship().start_date }} &ndash; {{ relationship().end_date }}
+      </p>
+      @if (relationship().goods) {
+      <p style="color:red">has goods!</p>
+      } @if (relationship().category_attributes) {
+      <p style="color:red">has category attributes!</p>
+      }
+      <p>last updated: {{ relationship().updated_at }}</p>
+      <a href="{{ relationship().link }}" target="_blank">source</a>
+    </div>
   `,
   styleUrl: './relationship-details.css',
 })

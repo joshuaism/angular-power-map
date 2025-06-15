@@ -8,9 +8,11 @@ import { LittlesisService } from '../littlesis.service';
   selector: 'app-relationships-tab',
   imports: [],
   template: `
-    @for(relationship of relationships; track relationship.id) {
-    <p (click)="focus(relationship)">{{ relationship.description }}</p>
-    }
+    <div class="scrollable">
+      @for(relationship of relationships; track relationship.id) {
+      <p (click)="focus(relationship)">{{ relationship.description }}</p>
+      }
+    </div>
   `,
   styleUrl: './relationships-tab.css',
 })

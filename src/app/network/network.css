@@ -1,12 +1,17 @@
 .network {
-  position: fixed;
-  width: 80%;
+  position: absolute;
+  width: 90%;
   height: 80%;
   border: 1px solid lightgray;
 }
 
 .info-box {
-  float: right;
-  width: 18%;
-  max-height: 80%;
+  right: 0%;
+  position: absolute;
+  width: 30%;
+  min-height: 79%;
+  max-height: 79%;
+  background-color: blanchedalmond;
+  padding: 1%;
+  overflow: hidden;
 }

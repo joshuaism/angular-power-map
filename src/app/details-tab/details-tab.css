@@ -1,0 +1,7 @@
+.scrollable {
+  max-height: 700px;
+  min-height: 700px;
+  height: 700px;
+  padding-right: 3em;
+  overflow-y: scroll;
+}

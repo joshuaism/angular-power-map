@@ -4,6 +4,7 @@ import { DataSet } from 'vis-data';
 import { LittlesisService } from './littlesis.service';
 import { Connection } from './connection';
 import { Entity } from './entity';
+import { Relationship } from './relationship';
 
 export class LittleSisNetwork {
   service = new LittlesisService();
@@ -20,9 +21,6 @@ export class LittleSisNetwork {
       interaction: {
         hover: true,
       },
-      manipulation: {
-        enabled: true,
-      },
       nodes: {
         shape: 'dot',
         size: 20,
@@ -36,6 +34,11 @@ export class LittleSisNetwork {
     this.network = network;
 
     let that = this;
+    network.on('hoverEdge', function (params: any) {
+      console.log('hoverEdge Event:', params);
+      let id = params.edge;
+      that.populateEdgeTooltip(id);
+    });
     network.on('hoverNode', function (params: any) {
       console.log('hoverNode Event:', params);
     });
@@ -44,7 +47,6 @@ export class LittleSisNetwork {
     });
     network.on('selectNode', function (params: any) {
       console.log('selectNode event:', params);
-      console.log(params.pointer.canvas.x);
       let id = params.nodes[0];
       that.populateNetwork(id);
     });
@@ -62,11 +64,21 @@ export class LittleSisNetwork {
         that.nodeDataSet?.update({
           id: id,
           fixed: true,
-          title: "I've been dragged!",
         });
       }
       network.unselectAll();
     });
+  }
+
+  populateEdgeTooltip(id: number) {
+    let edge = this.edgeDataSet.get(id);
+    if (edge?.title === 'connection') {
+      this.service.getRelationshipById(id).then((relationship) => {
+        edge.title = relationship.description;
+        edge.color = this.getEdgeColor(relationship.category_id);
+        this.edgeDataSet.update(edge);
+      });
+    }
   }
 
   populateNetwork(id: number) {
@@ -101,11 +113,30 @@ export class LittleSisNetwork {
             from: c.parent_id,
             to: c.entity.id,
             color: this.getEdgeColor(c.connection_category),
+            title: 'connection',
             width: 4,
           };
         });
       this.nodeDataSet.add(nodes);
       this.edgeDataSet.add(edges);
+      this.service
+        .getOligrapherRelationships(id, this.nodeDataSet.getIds())
+        .then((relationships) => {
+          let edgeIds = this.edgeDataSet.getIds();
+          let edges = relationships
+            .filter((r: Relationship) => !edgeIds.includes(r.id))
+            .map((r: Relationship) => {
+              return {
+                id: r.id,
+                from: r.entity1_id,
+                to: r.entity2_id,
+                title: 'connection', // oligrapher has bad titles
+                color: this.getEdgeColor(r.category_id),
+                width: 4,
+              };
+            });
+          this.edgeDataSet.add(edges);
+        });
     });
   }
 

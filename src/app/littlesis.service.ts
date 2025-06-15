@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Entity } from './entity';
 import { Relationship } from './relationship';
 import { Connection } from './connection';
+import { Id } from 'vis-data/declarations/data-interface';
 
 @Injectable({
   providedIn: 'root',
@@ -14,6 +15,27 @@ export class LittlesisService {
     const response = await fetch(url);
     const json = await response.json();
     json.data.attributes.link = json.data.links.self;
+    return json.data.attributes ?? {};
+  }
+
+  async getRelationshipById(id: number): Promise<Relationship> {
+    let url = `https://littlesis.org/api/relationships/${id}`;
+    const response = await fetch(url);
+    const json = await response.json();
+    let relationship = json.data.attributes;
+    relationship.link = json.data.self;
+    let amount = relationship.amount?.toLocaleString(undefined, {
+      style: 'currency',
+      currency: relationship.currency,
+    });
+    let description = relationship.description;
+    if (amount && relationship.category_id === 5) {
+      description = description.replace('money', amount);
+    }
+    if (amount && relationship.category_id === 6) {
+      description = description.replace('did/do', `did ${amount} in`);
+    }
+    relationship.description = description;
     return json.data.attributes ?? {};
   }
 
@@ -54,16 +76,16 @@ export class LittlesisService {
 
   async getOligrapherRelationships(
     id: number,
-    ids: number[]
+    ids: Id[]
   ): Promise<Relationship[]> {
     let url = `https://littlesis.org/oligrapher/get_edges?entity1_id=${id}&entity2_ids=${ids}`;
-    console.log(url);
     const response = await fetch(url);
     const json = await response.json();
     return (
       json.map((relationship: any) => {
         relationship.entity1_id = relationship.node1_id;
         relationship.entity2_id = relationship.node2_id;
+        relationship.title = 'connection';
         return relationship;
       }) ?? []
     );

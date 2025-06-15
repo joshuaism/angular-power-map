@@ -16,12 +16,13 @@ import { EntityAutocomplete } from '../entity-autocomplete/entity-autocomplete';
       ></app-entity-autocomplete>
     </section>
     <section>
-      <div id="mynetwork" #myNetwork></div>
-    </section>
-    <section>
-      @for (entity of entities; track entity.id) {
-      <app-details [entity]="entity" [network]="network"></app-details>
-      }
+      <div class="network" id="mynetwork" #myNetwork></div>
+      <section></section>
+      <div class="info-box">
+        @for (entity of entities; track entity.id) {
+        <app-details [entity]="entity" [network]="network"></app-details>
+        }
+      </div>
     </section>
   `,
   styleUrls: ['./network.css'],

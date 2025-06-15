@@ -8,6 +8,6 @@
   width: 100%;
 }
 
-.options {
-  color: gray;
+.mat-mdc-option.mdc-list-item {
+  background-color: rgb(215, 214, 214);
 }

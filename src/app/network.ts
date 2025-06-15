@@ -34,15 +34,8 @@ export class LittleSisNetwork {
 
     let that = this;
     network.on('hoverEdge', function (params: any) {
-      console.log('hoverEdge Event:', params);
       let id = params.edge;
       that.populateEdgeTooltip(id);
-    });
-    network.on('hoverNode', function (params: any) {
-      console.log('hoverNode Event:', params);
-    });
-    network.on('blurNode', function (params: any) {
-      console.log('blurNode event:', params);
     });
     network.on('selectNode', function (params: any) {
       console.log('selectNode event:', params);
@@ -50,14 +43,12 @@ export class LittleSisNetwork {
       that.populateNetwork(id);
     });
     network.on('dragStart', function (params: any) {
-      console.log('dragStart Event:', params);
       let id = params.nodes[0];
       if (id) {
         that.nodeDataSet?.update({ id: id, fixed: false });
       }
     });
     network.on('dragEnd', function (params: any) {
-      console.log('dragEnd Event:', params);
       let id = params.nodes[0];
       if (id) {
         that.nodeDataSet?.update({

@@ -14,7 +14,7 @@ import { LittleSisNetwork } from '../network';
   `,
   styleUrl: './details-tab.css',
 })
-export class Details {
+export class DetailsTab {
   entity = input.required<Entity>();
   network = input<LittleSisNetwork>();
 

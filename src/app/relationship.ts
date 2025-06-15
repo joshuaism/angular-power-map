@@ -2,9 +2,9 @@ import { Entity } from './entity';
 
 export interface Relationship {
   id: number;
-  entity1_id: string;
+  entity1_id: number;
   entity1: Entity;
-  entity2_id: string;
+  entity2_id: number;
   entity2: Entity;
   category_id: number;
   description: string;

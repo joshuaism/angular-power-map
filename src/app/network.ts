@@ -60,7 +60,7 @@ export class LittleSisNetwork {
     });
   }
 
-  populateEdgeTooltip(id: number) {
+  private populateEdgeTooltip(id: number) {
     let edge = this.edgeDataSet.get(id);
     if (edge?.title === 'connection') {
       this.service.getRelationshipById(id).then((relationship) => {
@@ -69,6 +69,25 @@ export class LittleSisNetwork {
         this.edgeDataSet.update(edge);
       });
     }
+  }
+
+  populateSingleNodeAndEdge(entity: Entity, relationship: Relationship) {
+    let node = this.nodeDataSet.get(entity.id);
+    let edge = this.edgeDataSet.get(relationship.id);
+    if (!node) {
+      this.nodeDataSet.update(this.createNode(entity));
+    }
+    if (!edge) {
+      this.edgeDataSet.update({
+        id: relationship.id,
+        from: relationship.entity1_id,
+        to: relationship.entity2_id,
+        title: relationship.description,
+        color: this.getEdgeColor(relationship.category_id),
+        width: 4,
+      });
+    }
+    this.network?.focus(entity.id);
   }
 
   async populateNetwork(entity: number | Entity) {
@@ -127,7 +146,7 @@ export class LittleSisNetwork {
     this.network?.focus(id);
   }
 
-  async populateConnections(id: number, category?: number) {
+  private async populateConnections(id: number, category?: number) {
     await this.service
       .getConnectionsByEntityId(id, category)
       .then((connections) => {

@@ -33,11 +33,7 @@ export class Network implements AfterViewInit {
   entities: Entity[] = [];
   service: LittlesisService = inject(LittlesisService);
 
-  constructor() {
-    /*this.service.getEntitiesByName('Clinton').then((entities) => {
-      entities.forEach((entity) => console.log(entity));
-    });*/
-  }
+  constructor() {}
 
   ngAfterViewInit() {
     this.network = new LittleSisNetwork(this.networkContainer.nativeElement);
@@ -52,9 +48,8 @@ export class Network implements AfterViewInit {
     });
   }
 
-  addOrPopulateNode(node: Entity) {
-    console.log('Hi mom!');
-    console.log(node);
-    this.network?.populateNetwork(node.id);
+  addOrPopulateNode(entity: Entity) {
+    this.network?.populateNetwork(entity);
+    this.entities = [entity];
   }
 }

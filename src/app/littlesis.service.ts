@@ -66,7 +66,8 @@ export class LittlesisService {
         let connection: Connection = value;
         connection.entity = value.attributes;
         connection.entity.link = value.links.self;
-        connection.connection_id = value.attributes.connected_relationship_ids;
+        connection.connection_id =
+          value.attributes.connected_relationship_ids.split(',')[0];
         connection.connection_category = value.attributes.connected_category_id;
         connection.parent_id = id;
         return connection;

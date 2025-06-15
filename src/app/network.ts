@@ -11,12 +11,11 @@ export class LittleSisNetwork {
   nodeDataSet = new DataSet<MyNode>();
   edgeDataSet = new DataSet<Edge>();
   network?: Network;
-  nextNodeId = 0;
-  nextEdgeId = 0;
+
+  PERSON_CATEGORIES = [1, 4, 8];
+  ORG_CATEGORIES = [1, 6, 10];
 
   constructor(container: HTMLElement) {
-    // start with elon musk for now
-    this.populateNetwork(38805);
     var options = {
       interaction: {
         hover: true,
@@ -81,63 +80,89 @@ export class LittleSisNetwork {
     }
   }
 
-  populateNetwork(id: number) {
+  async populateNetwork(entity: number | Entity) {
+    let id = typeof entity === 'number' ? entity : entity.id;
     let parent = this.nodeDataSet.get(id);
     if (parent?.populated) {
       console.log('already populated');
+      this.network?.focus(id);
       return;
     }
     if (!parent) {
-      this.service.getEntityById(id).then((entity) => {
-        let node = this.createNode(entity, true, true);
+      if (typeof entity === 'number') {
+        await this.service.getEntityById(id).then((entity) => {
+          let node = this.createNode(entity);
+          this.nodeDataSet.add(node);
+          this.network?.focus(id);
+        });
+      } else {
+        let node = this.createNode(entity);
         this.nodeDataSet.add(node);
-      });
-    } else {
-      parent.populated = true;
-      parent.expanded = true;
-      this.nodeDataSet.update(parent);
+        this.network?.focus(id);
+      }
     }
-    this.service.getConnectionsByEntityId(id).then((connections) => {
-      let nodeIds = this.nodeDataSet.getIds();
-      let nodes = connections
-        .filter((c: Connection) => !nodeIds.includes(c.entity.id))
-        .map((c: Connection) => {
-          return this.createNode(c.entity);
-        });
-      let edgeIds = this.edgeDataSet.getIds();
-      let edges = connections
-        .filter((c: Connection) => !edgeIds.includes(c.connection_id))
-        .map((c: Connection) => {
-          return {
-            id: c.connection_id,
-            from: c.parent_id,
-            to: c.entity.id,
-            color: this.getEdgeColor(c.connection_category),
-            title: 'connection',
-            width: 4,
-          };
-        });
-      this.nodeDataSet.add(nodes);
-      this.edgeDataSet.add(edges);
-      this.service
-        .getOligrapherRelationships(id, this.nodeDataSet.getIds())
-        .then((relationships) => {
-          let edgeIds = this.edgeDataSet.getIds();
-          let edges = relationships
-            .filter((r: Relationship) => !edgeIds.includes(r.id))
-            .map((r: Relationship) => {
-              return {
-                id: r.id,
-                from: r.entity1_id,
-                to: r.entity2_id,
-                title: 'connection', // oligrapher has bad titles
-                color: this.getEdgeColor(r.category_id),
-                width: 4,
-              };
-            });
-          this.edgeDataSet.add(edges);
-        });
-    });
+    let categories =
+      this.nodeDataSet.get(id)?.type.toUpperCase() === 'PERSON'
+        ? this.PERSON_CATEGORIES
+        : this.ORG_CATEGORIES;
+    for (const category of categories) {
+      await this.populateConnections(id, category);
+    }
+    await this.populateConnections(id);
+    this.service
+      .getOligrapherRelationships(id, this.nodeDataSet.getIds())
+      .then((relationships) => {
+        let edgeIds = this.edgeDataSet.getIds();
+        let edges = relationships
+          .filter((r: Relationship) => !edgeIds.includes(r.id))
+          .map((r: Relationship) => {
+            return {
+              id: r.id,
+              from: r.entity1_id,
+              to: r.entity2_id,
+              title: 'connection', // oligrapher has bad titles
+              color: this.getEdgeColor(r.category_id),
+              width: 4,
+            };
+          });
+        this.edgeDataSet.add(edges);
+      });
+
+    let node = this.nodeDataSet.get(id);
+    node!.populated = true;
+    node!.expanded = true;
+    this.nodeDataSet.update(node!);
+
+    this.network?.focus(id);
+  }
+
+  async populateConnections(id: number, category?: number) {
+    await this.service
+      .getConnectionsByEntityId(id, category)
+      .then((connections) => {
+        let nodeIds = this.nodeDataSet.getIds();
+        let nodes = connections
+          .filter((c: Connection) => !nodeIds.includes(c.entity.id))
+          .slice(0, 5)
+          .map((c: Connection) => {
+            return this.createNode(c.entity);
+          });
+        let edgeIds = this.edgeDataSet.getIds();
+        let edges = connections
+          .filter((c: Connection) => !edgeIds.includes(c.connection_id))
+          .map((c: Connection) => {
+            return {
+              id: c.connection_id,
+              from: c.parent_id,
+              to: c.entity.id,
+              color: this.getEdgeColor(c.connection_category),
+              title: 'connection',
+              width: 4,
+            };
+          });
+        this.nodeDataSet.add(nodes);
+        this.edgeDataSet.add(edges);
+      });
   }
 
   createNode(entity: Entity, populated = false, expanded = false): MyNode {
@@ -146,6 +171,7 @@ export class LittleSisNetwork {
       label: entity.name,
       title: entity.blurb,
       color: entity.types[0] === 'Person' ? '#66B3BA' : '#9AB87A',
+      type: entity.types[0],
       populated: populated,
       expanded: expanded,
     };

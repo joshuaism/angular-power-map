@@ -23,6 +23,18 @@ export class LittlesisService {
     console.log(`couldn't get ${url}`, e);
   }
 
+  private formatDate(date: string): string {
+    if (!date) {
+      return '';
+    }
+    let options: any = {
+      month: 'short',
+      day: '2-digit',
+      year: 'numeric',
+    };
+    return new Date(date).toLocaleDateString(undefined, options);
+  }
+
   async getEntityById(id: number): Promise<Entity> {
     let url = `https://littlesis.org/api/entities/${id}`;
     return axios.get(url).then(
@@ -43,6 +55,8 @@ export class LittlesisService {
       (response) => {
         const json = response.data;
         let relationship = json.data.attributes;
+        relationship.entity1 = json.included[0].attributes;
+        relationship.entity2 = json.included[1].attributes;
         relationship.link = json.data.self;
         let amount = relationship.amount?.toLocaleString(undefined, {
           style: 'currency',
@@ -56,6 +70,12 @@ export class LittlesisService {
           description = description.replace('did/do', `did ${amount} in`);
         }
         relationship.description = description;
+        relationship.start_date = relationship.start_date
+          ? this.formatDate(relationship.start_date)
+          : 'the dawn of time';
+        relationship.end_date = relationship.end_date
+          ? this.formatDate(relationship.end_date)
+          : 'present';
         return json.data.attributes ?? {};
       },
       (error) => {

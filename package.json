@@ -17,6 +17,8 @@
     "@angular/material": "^20.0.3",
     "@angular/platform-browser": "^20.0.0",
     "@angular/router": "^20.0.0",
+    "axios": "^1.10.0",
+    "axios-retry": "^4.5.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "vis-data": "^7.1.9",

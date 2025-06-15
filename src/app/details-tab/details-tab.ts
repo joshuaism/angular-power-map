@@ -3,7 +3,7 @@ import { Entity } from '../entity';
 import { LittleSisNetwork } from '../network';
 
 @Component({
-  selector: 'app-details',
+  selector: 'app-details-tab',
   imports: [],
   template: `
     <h3 (click)="focus(entity().id)">{{ entity().name }}</h3>
@@ -12,7 +12,7 @@ import { LittleSisNetwork } from '../network';
     <p>last updated: {{ entity().updated_at }}</p>
     <a href="{{ entity().link }}" target="_blank">source</a>
   `,
-  styleUrl: './details.css',
+  styleUrl: './details-tab.css',
 })
 export class Details {
   entity = input.required<Entity>();

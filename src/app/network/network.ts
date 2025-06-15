@@ -1,16 +1,16 @@
 import { AfterViewInit, Component, inject, ViewChild } from '@angular/core';
 import { ElementRef } from '@angular/core';
 import { LittleSisNetwork } from '../network';
-import { Details } from '../details/details';
 import { Entity } from '../entity';
 import { LittlesisService } from '../littlesis.service';
 import { EntityAutocomplete } from '../entity-autocomplete/entity-autocomplete';
 import { Relationship } from '../relationship';
 import { RelationshipDetails } from '../relationship-details/relationship-details';
+import { EntityDetails } from '../entity-details/entity-details';
 
 @Component({
   selector: 'app-network',
-  imports: [Details, RelationshipDetails, EntityAutocomplete],
+  imports: [EntityDetails, RelationshipDetails, EntityAutocomplete],
   template: `
     <section>
       <app-entity-autocomplete
@@ -22,7 +22,10 @@ import { RelationshipDetails } from '../relationship-details/relationship-detail
       <section></section>
       <div class="info-box">
         @for (entity of entities; track entity.id) {
-        <app-details [entity]="entity" [network]="network"></app-details>
+        <app-entity-details
+          [entity]="entity"
+          [network]="network"
+        ></app-entity-details>
         } @for (relationship of relationships; track relationship.id) {
         <app-relationship-details
           [relationship]="relationship"

@@ -1,9 +1,18 @@
-import { Component, EventEmitter, inject, OnInit, Output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  inject,
+  Output,
+  ViewChild,
+} from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { AsyncPipe } from '@angular/common';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import {
+  MatAutocomplete,
+  MatAutocompleteModule,
+} from '@angular/material/autocomplete';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { Entity } from '../entity';
@@ -30,6 +39,7 @@ import { LittlesisService } from '../littlesis.service';
           matInput
           [formControl]="myControl"
           [matAutocomplete]="auto"
+          (keyup.enter)="chooseFirstOption()"
         />
         <mat-autocomplete #auto="matAutocomplete">
           @for (option of filteredOptions | async; track option) {
@@ -47,6 +57,7 @@ import { LittlesisService } from '../littlesis.service';
 })
 export class EntityAutocomplete {
   @Output() notify: EventEmitter<Entity> = new EventEmitter<Entity>();
+  @ViewChild(MatAutocomplete) matAutocomplete!: MatAutocomplete;
   service: LittlesisService = inject(LittlesisService);
   myControl = new FormControl('');
   options: Map<string, Entity> = new Map<string, Entity>();
@@ -81,6 +92,10 @@ export class EntityAutocomplete {
     return Array.from(this.options.keys()).filter((key) =>
       filters.every((e) => key.toLowerCase().includes(e))
     );
+  }
+
+  chooseFirstOption() {
+    this.matAutocomplete.options.first.select();
   }
 
   emitEntity(value: string) {

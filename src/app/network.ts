@@ -101,11 +101,16 @@ export class LittleSisNetwork {
     }
   }
 
-  populateSingleNodeAndEdge(entity: Entity, relationship: Relationship) {
+  populateSingleNodeAndEdge(
+    entity: Entity,
+    relationship: Relationship,
+    parentId: number
+  ) {
     let node = this.nodeDataSet.get(entity.id);
     let edge = this.edgeDataSet.get(relationship.id);
     if (!node) {
-      this.nodeDataSet.update(this.createNode(entity));
+      let location = this.network?.getPosition(parentId);
+      this.nodeDataSet.update(this.createNode(entity, location));
     }
     if (!edge) {
       this.edgeDataSet.update({
@@ -122,10 +127,10 @@ export class LittleSisNetwork {
 
   async populateNetwork(entity: number | Entity) {
     let id = typeof entity === 'number' ? entity : entity.id;
+    this.network?.focus(id);
     let parent = this.nodeDataSet.get(id);
     if (parent?.populated) {
       console.log('already populated');
-      this.network?.focus(id);
       return;
     }
     if (!parent) {
@@ -133,14 +138,13 @@ export class LittleSisNetwork {
         await this.service.getEntityById(id).then((entity) => {
           let node = this.createNode(entity);
           this.nodeDataSet.add(node);
-          this.network?.focus(id);
         });
       } else {
         let node = this.createNode(entity);
         this.nodeDataSet.add(node);
-        this.network?.focus(id);
       }
     }
+    let location = this.network?.getPosition(id);
     let categories =
       this.nodeDataSet.get(id)?.type.toUpperCase() === 'PERSON'
         ? this.PERSON_CATEGORIES
@@ -171,12 +175,15 @@ export class LittleSisNetwork {
     let node = this.nodeDataSet.get(id);
     node!.populated = true;
     node!.expanded = true;
+    node!.x = location?.x;
+    node!.y = location?.y;
     this.nodeDataSet.update(node!);
 
     this.network?.focus(id);
   }
 
   private async populateConnections(id: number, category?: number) {
+    let location = this.network?.getPosition(id);
     await this.service
       .getConnectionsByEntityId(id, category)
       .then((connections) => {
@@ -184,7 +191,7 @@ export class LittleSisNetwork {
         let nodes = connections
           .filter((c: Connection) => !nodeIds.includes(c.entity.id))
           .map((c: Connection) => {
-            return this.createNode(c.entity);
+            return this.createNode(c.entity, location);
           });
         let edgeIds = this.edgeDataSet.getIds();
         let edges = connections
@@ -204,12 +211,23 @@ export class LittleSisNetwork {
       });
   }
 
-  createNode(entity: Entity, populated = false, expanded = false): MyNode {
+  createNode(
+    entity: Entity,
+    location?: { x: number; y: number },
+    populated = false,
+    expanded = false
+  ): MyNode {
+    // nodes with the exact same location stack on top of each other instead
+    // of being repelled by the physics simulation, so introduce some noise
+    let noiseX = Math.random() * 60 - 30;
+    let noiseY = Math.random() * 60 - 30;
     return {
       id: entity.id,
       label: entity.name,
       title: entity.blurb,
       color: entity.types[0] === 'Person' ? '#66B3BA' : '#9AB87A',
+      x: location ? location.x + noiseX : noiseX,
+      y: location ? location.y + noiseY : noiseY,
       type: entity.types[0],
       populated: populated,
       expanded: expanded,

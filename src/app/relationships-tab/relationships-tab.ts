@@ -74,7 +74,11 @@ export class RelationshipsTab implements OnInit {
         ? relationship.entity2_id
         : relationship.entity1_id;
     this.service.getEntityById(entityid).then((entity) => {
-      this.network()?.populateSingleNodeAndEdge(entity, relationship);
+      this.network()?.populateSingleNodeAndEdge(
+        entity,
+        relationship,
+        this.entity().id
+      );
     });
   }
 }

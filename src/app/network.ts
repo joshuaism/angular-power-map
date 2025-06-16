@@ -14,6 +14,7 @@ export class LittleSisNetwork {
 
   PERSON_CATEGORIES = [1, 4, 8];
   ORG_CATEGORIES = [1, 6, 10];
+  DEFAULT_EDGE_TITLE = 'connection';
 
   constructor(container: HTMLElement) {
     var options = {
@@ -92,11 +93,12 @@ export class LittleSisNetwork {
 
   private populateEdgeTooltip(id: number) {
     let edge = this.edgeDataSet.get(id);
-    if (edge?.title === 'connection') {
+    if (edge?.title === this.DEFAULT_EDGE_TITLE) {
       this.service.getRelationshipById(id).then((relationship) => {
         edge.title = relationship.description;
         edge.color = this.getEdgeColor(relationship.category_id);
         this.edgeDataSet.update(edge);
+        console.log(`littlesis service updated ${id} title to ${edge.title}`);
       });
     }
   }
@@ -125,12 +127,42 @@ export class LittleSisNetwork {
     this.network?.focus(entity.id);
   }
 
+  populateMissingEdgeTitles(relationships: Relationship[]) {
+    // This will hopefully cut down on roundtrips to the littlesis service on edge mouseover
+    if (relationships.length <= 0) return;
+    let relationshipsMap = new Map<string, Relationship>();
+    let ids: string[] = [];
+    relationships.map((r) => {
+      let id = r.id.toString();
+      ids.push(id);
+      relationshipsMap.set(id, r);
+    });
+    this.edgeDataSet
+      .get(ids, {
+        filter: (edge) => edge.title === this.DEFAULT_EDGE_TITLE,
+      })
+      .forEach((edge) => {
+        if (edge) {
+          let relationship = relationshipsMap.get(edge.id as string);
+          if (relationship) {
+            edge.title = relationship.description;
+            edge.color = this.getEdgeColor(relationship.category_id);
+            console.log(
+              `populateMissingEdgeTitles: ${edge.id} title updated to ${edge.title}`
+            );
+            this.edgeDataSet.update(edge);
+          }
+        }
+      });
+  }
+
   async populateNetwork(entity: number | Entity) {
     let id = typeof entity === 'number' ? entity : entity.id;
     this.network?.focus(id);
     let parent = this.nodeDataSet.get(id);
     if (parent?.populated) {
       console.log('already populated');
+      this.network?.focus(id);
       return;
     }
     if (!parent) {
@@ -164,7 +196,7 @@ export class LittleSisNetwork {
               id: r.id,
               from: r.entity1_id,
               to: r.entity2_id,
-              title: 'connection', // oligrapher has bad titles
+              title: this.DEFAULT_EDGE_TITLE, // oligrapher has bad titles
               color: this.getEdgeColor(r.category_id),
               width: 4,
             };
@@ -202,7 +234,7 @@ export class LittleSisNetwork {
               from: c.parent_id,
               to: c.entity.id,
               color: this.getEdgeColor(c.connection_category),
-              title: 'connection',
+              title: this.DEFAULT_EDGE_TITLE,
               width: 4,
             };
           });

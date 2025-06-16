@@ -65,6 +65,7 @@ export class RelationshipsTab implements OnInit {
           (a, b) =>
             b.amount - a.amount || a.description.localeCompare(b.description)
         );
+        this.network()?.populateMissingEdgeTitles(this.relationships);
       });
   }
 

@@ -23,6 +23,36 @@ export class LittleSisNetwork {
       nodes: {
         shape: 'dot',
         size: 20,
+        widthConstraint: { maximum: 120 },
+        font: {
+          strokeWidth: 3,
+          strokeColor: 'white',
+        },
+        borderWidth: 2,
+        shadow: true,
+      },
+      edges: {
+        arrows: '',
+        width: 6,
+        shadow: true,
+        smooth: {
+          enabled: true,
+          type: 'continuous',
+          forceDirection: 'none',
+          roundness: 0.1,
+        },
+      },
+      physics: {
+        hierarchicalRepulsion: {
+          centralGravity: 0,
+          springLength: 150,
+          springConstant: 0.1,
+          nodeDistance: 100,
+          damping: 0.75,
+          avoidOverlap: 1,
+        },
+        minVelocity: 0.75,
+        solver: 'hierarchicalRepulsion',
       },
     };
     let treeData = {
@@ -153,7 +183,6 @@ export class LittleSisNetwork {
         let nodeIds = this.nodeDataSet.getIds();
         let nodes = connections
           .filter((c: Connection) => !nodeIds.includes(c.entity.id))
-          .slice(0, 5)
           .map((c: Connection) => {
             return this.createNode(c.entity);
           });

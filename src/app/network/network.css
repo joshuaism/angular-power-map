@@ -1,18 +1,56 @@
 .network {
   position: absolute;
-  width: 90%;
+  width: 99%;
   height: 80%;
   border: 1px solid lightgray;
+}
+
+@media (max-width: 700px) {
+  .info-box {
+    width: 70%;
+  }
+
+  .info-box-tab {
+    right: 71.5%;
+  }
+}
+
+@media (min-width: 700px) {
+  .info-box {
+    width: 30%;
+  }
+
+  .info-box-tab {
+    right: 31.75%;
+  }
 }
 
 .info-box {
   right: 0%;
   bottom: 0%;
+  border-width: 1px 1px 1px 1px;
   position: absolute;
-  width: 30%;
-  min-height: 80%;
-  max-height: 80%;
+  border-style: solid;
+  border-color: black;
+  min-height: 85%;
+  max-height: 85%;
   background-color: blanchedalmond;
   padding: 1%;
   overflow: hidden;
+  &.hidden {
+    right: -71.75%;
+  }
+}
+
+.info-box-tab {
+  background-color: rgba(18, 0, 218, 0.314);
+  border-width: 1px 0px 1px 1px;
+  position: absolute;
+  border-style: solid;
+  border-color: black;
+  cursor: pointer;
+  padding: 2em;
+  &.hidden {
+    right: 0;
+  }
 }

@@ -1,5 +1,6 @@
 import { AfterViewInit, Component, inject, ViewChild } from '@angular/core';
 import { ElementRef } from '@angular/core';
+import { NgClass } from '@angular/common';
 import { LittleSisNetwork } from '../network';
 import { Entity } from '../entity';
 import { LittlesisService } from '../littlesis.service';
@@ -10,7 +11,7 @@ import { EntityDetails } from '../entity-details/entity-details';
 
 @Component({
   selector: 'app-network',
-  imports: [EntityDetails, RelationshipDetails, EntityAutocomplete],
+  imports: [EntityDetails, RelationshipDetails, EntityAutocomplete, NgClass],
   template: `
     <section>
       <app-entity-autocomplete
@@ -20,7 +21,7 @@ import { EntityDetails } from '../entity-details/entity-details';
     <section>
       <div class="network" id="mynetwork" #myNetwork></div>
       <section></section>
-      <div class="info-box">
+      <div class="info-box" [ngClass]="{ hidden: hidden }">
         @for (entity of entities; track entity.id) {
         <app-entity-details
           [entity]="entity"
@@ -33,6 +34,13 @@ import { EntityDetails } from '../entity-details/entity-details';
         ></app-relationship-details>
         }
       </div>
+      <div
+        class="info-box-tab"
+        [ngClass]="{ hidden: hidden }"
+        (click)="toggleButton()"
+      >
+        <h1>+</h1>
+      </div>
     </section>
   `,
   styleUrls: ['./network.css'],
@@ -44,6 +52,7 @@ export class Network implements AfterViewInit {
   entities: Entity[] = [];
   relationships: Relationship[] = [];
   service: LittlesisService = inject(LittlesisService);
+  hidden = true;
 
   constructor() {}
 
@@ -77,5 +86,15 @@ export class Network implements AfterViewInit {
   addOrPopulateNode(entity: Entity) {
     this.network?.populateNetwork(entity);
     this.entities = [entity];
+  }
+
+  toggleButton() {
+    console.log(this.hidden);
+    this.hidden = !this.hidden;
+  }
+
+  showInfoBoxTab() {
+    if (this.hidden) {
+    }
   }
 }

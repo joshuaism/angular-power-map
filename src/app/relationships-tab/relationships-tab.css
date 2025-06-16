@@ -4,3 +4,11 @@
   height: 700px;
   overflow-y: scroll;
 }
+
+.mat-mdc-option.mdc-list-item {
+  background-color: rgb(215, 214, 214);
+}
+
+.mat-mdc-option.mdc-list-item.mdc-list-item--selected {
+  background-color: rgb(255, 255, 255);
+}

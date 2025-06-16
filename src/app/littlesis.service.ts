@@ -180,7 +180,6 @@ export class LittlesisService {
             );
             let description = relationship.attributes.description;
             if (amount) {
-              relationship.attributes.amount = amount;
               if (relationship.attributes.category_id === 5) {
                 description = description.replace('money', amount);
               }

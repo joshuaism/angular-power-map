@@ -32,7 +32,13 @@ import { FormsModule } from '@angular/forms';
     </mat-form-field>
     <div class="scrollable">
       @for(relationship of relationships; track relationship.id) {
-      <p (click)="focus(relationship)">{{ relationship.description }}</p>
+      <p
+        (click)="focus(relationship)"
+        style="cursor:pointer;"
+        title="add this relationship to the map"
+      >
+        {{ relationship.description }}
+      </p>
       }
     </div>
   `,
@@ -48,19 +54,17 @@ export class RelationshipsTab implements OnInit {
   relationships: Relationship[] = [];
 
   ngOnInit(): void {
-    this.service
-      .getRelationshipsByEntityId(this.entity().id, this.selected)
-      .then((relationships) => {
-        this.relationships = relationships;
-      });
+    this.getRelationships();
   }
 
   getRelationships() {
-    console.log(this.selected);
     this.service
       .getRelationshipsByEntityId(this.entity().id, this.selected)
       .then((relationships) => {
-        this.relationships = relationships;
+        this.relationships = relationships.sort(
+          (a, b) =>
+            b.amount - a.amount || a.description.localeCompare(b.description)
+        );
       });
   }
 

@@ -253,10 +253,11 @@ export class LittleSisNetwork {
     // of being repelled by the physics simulation, so introduce some noise
     let noiseX = Math.random() * 60 - 30;
     let noiseY = Math.random() * 60 - 30;
+    let title = entity.blurb ? `${entity.name}\n${entity.blurb}` : entity.name;
     return {
       id: entity.id,
       label: entity.name,
-      title: entity.blurb,
+      title: title,
       color: entity.types[0] === 'Person' ? '#66B3BA' : '#9AB87A',
       x: location ? location.x + noiseX : noiseX,
       y: location ? location.y + noiseY : noiseY,

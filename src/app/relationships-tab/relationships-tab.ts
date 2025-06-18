@@ -30,6 +30,7 @@ import { FormsModule } from '@angular/forms';
         <mat-option [value]="12">Uncategorized Relations</mat-option>
       </mat-select>
     </mat-form-field>
+    <h4>{{ relationships.length }} relationships</h4>
     <div class="scrollable">
       @for(relationship of relationships; track relationship.id) {
       <p

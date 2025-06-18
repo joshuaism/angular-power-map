@@ -14,6 +14,56 @@ export class LittleSisNetwork {
 
   PERSON_CATEGORIES = [1, 4, 8];
   ORG_CATEGORIES = [1, 6, 10];
+  GOVERNMENT_TYPES = [
+    'Government Advisory Body',
+    'Government Body',
+    'Government-Sponsored Enterprise',
+    'Public Official',
+  ];
+  POLITICIAN_TYPES = ['Political Candidate', 'Elected Representative'];
+  PAC_TYPES = [
+    'Individual Campaign Committee',
+    'Other Campaign Committee',
+    'PAC',
+    'Political Fundraising Committee',
+  ];
+  LOBBYIST_TYPES = [
+    'Lobbying Firm',
+    'Public Relations Firm',
+    'Consulting Firm',
+    'Elite Consensus Group',
+    'Policy/Think Tank',
+    'Lobbyist',
+  ];
+  ACADEMIC_TYPES = [
+    'Academic',
+    'Academic Research Institute',
+    'School',
+    'Cultural/Arts',
+  ];
+  CORPORATE_TYPES = ['Industry/Trade Association', 'Professional Association'];
+  LABOR_TYPES = ['Labor Union'];
+  NON_PROFIT_TYPES = [
+    'Membership Organization',
+    'Social Club',
+    'Other Not-for-Profit',
+    'Philanthropy',
+  ];
+  MEDIA_TYPES = [
+    'Media Organization',
+    'Media Personality',
+    'Public Intellectual',
+  ];
+  POLITICAL_PARTY_TYPES = ['Political Party'];
+  OTHER_TYPES = [
+    'Business',
+    'Private Company',
+    'Public Company',
+    'Law Firm',
+    'Business Person',
+    'Lawyer',
+  ];
+
   DEFAULT_EDGE_TITLE = 'connection';
 
   constructor(container: HTMLElement) {
@@ -258,7 +308,9 @@ export class LittleSisNetwork {
       id: entity.id,
       label: entity.name,
       title: title,
-      color: entity.types[0] === 'Person' ? '#66B3BA' : '#9AB87A',
+      color: this.getNodeColor(entity.types),
+      borderWidth: 4,
+      borderWidthSelected: 8,
       x: location ? location.x + noiseX : noiseX,
       y: location ? location.y + noiseY : noiseY,
       type: entity.types[0],
@@ -269,13 +321,53 @@ export class LittleSisNetwork {
 
   getEdgeColor(category: number): string {
     let color = '#76957E';
-    if (category === 1) color = '#69951E';
-    if (category === 2) color = '#F9CFF2';
-    if (category === 3) color = '#E09F3E';
-    if (category === 4) color = '#7C98B3';
-    if (category === 5) color = '#DEDBCA';
-    if (category === 7) color = '#C7403B';
-    if (category === 8) color = '#536B78';
+    if (category === 1) return '#69951E';
+    if (category === 2) return '#F9CFF2';
+    if (category === 3) return '#E09F3E';
+    if (category === 4) return '#7C98B3';
+    if (category === 5) return '#DEDBCA';
+    if (category === 7) return '#C7403B';
+    if (category === 8) return '#536B78';
+    return color;
+  }
+
+  getNodeColor(types: string[]): string | Object {
+    let color = types[0] === 'Person' ? '#66B3BA' : '#9AB87A';
+    if (types.length === 1) {
+      return color;
+    }
+    let border = '';
+    if (types.includes('Media Organization')) {
+      border = '#FFFFFF';
+    } else if (types.some((r) => this.PAC_TYPES.includes(r))) {
+      border = '#FA8072';
+    } else if (types.some((r) => this.POLITICIAN_TYPES.includes(r))) {
+      border = '#E09F3E';
+    } else if (types.some((r) => this.GOVERNMENT_TYPES.includes(r))) {
+      border = '#FFFF00';
+    } else if (types.some((r) => this.LOBBYIST_TYPES.includes(r))) {
+      border = '#C7403B';
+    } else if (types.some((r) => this.MEDIA_TYPES.includes(r))) {
+      border = '#DEDBCA';
+    } else if (types.some((r) => this.POLITICAL_PARTY_TYPES.includes(r))) {
+      border = '#00FFD5';
+    } else if (types.some((r) => this.LABOR_TYPES.includes(r))) {
+      border = '#C3FF00';
+    } else if (types.some((r) => this.CORPORATE_TYPES.includes(r))) {
+      border = '#00FFD5';
+    } else if (types.some((r) => this.ACADEMIC_TYPES.includes(r))) {
+      border = '#F9CFF2';
+    } else if (types.some((r) => this.NON_PROFIT_TYPES.includes(r))) {
+      border = '#66B3BA';
+    }
+    if (border !== '') {
+      return {
+        background: color,
+        border: border,
+        highlight: { background: color, border: border },
+        hover: { background: color, border: border },
+      };
+    }
     return color;
   }
 }

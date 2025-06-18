@@ -35,6 +35,11 @@ import { LittleSisNetwork } from '../network';
       </a>
       }
       <p>{{ entity().summary }}</p>
+      <h4>
+        @for (type of entity().types; track type) {
+        {{ type }}<br />
+        }
+      </h4>
       <p>last updated: {{ entity().updated_at }}</p>
       <a href="{{ entity().link }}" target="_blank">source</a>
       <br />

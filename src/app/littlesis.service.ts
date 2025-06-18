@@ -35,12 +35,20 @@ export class LittlesisService {
     return new Date(date).toLocaleDateString(undefined, options);
   }
 
+  private createEntity(data: any): Entity {
+    data.attributes.link = data.links.self;
+    data.attributes.aliases = data.attributes.aliases.filter(
+      (alias: string) => alias !== data.attributes.name
+    );
+    return data.attributes;
+  }
+
   async getEntityById(id: number): Promise<Entity> {
     let url = `https://littlesis.org/api/entities/${id}`;
     return axios.get(url).then(
       (response) => {
         const json = response.data;
-        json.data.attributes.link = json.data.links.self;
+        json.data.attributes = this.createEntity(json.data);
         return json.data.attributes ?? {};
       },
       (error) => {
@@ -91,8 +99,7 @@ export class LittlesisService {
         const json = response.data;
         return (
           json.data.map((data: any) => {
-            data.attributes.link = data.links.self;
-            return data.attributes;
+            return this.createEntity(data);
           }) ?? []
         );
       },
@@ -117,8 +124,7 @@ export class LittlesisService {
         return (
           json.data.map((value: any) => {
             let connection: Connection = value;
-            connection.entity = value.attributes;
-            connection.entity.link = value.links.self;
+            connection.entity = this.createEntity(value);
             connection.connection_id =
               value.attributes.connected_relationship_ids.split(',')[0];
             connection.connection_category =

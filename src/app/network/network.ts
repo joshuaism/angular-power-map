@@ -22,12 +22,12 @@ import { EntityDetails } from '../entity-details/entity-details';
       <div class="network" id="mynetwork" #myNetwork></div>
       <section></section>
       <div class="info-box" [ngClass]="{ hidden: hidden }">
-        @for (entity of entities; track entity.id) {
+        @if (entity) {
         <app-entity-details
           [entity]="entity"
           [network]="network"
         ></app-entity-details>
-        } @for (relationship of relationships; track relationship.id) {
+        } @if(relationship) {
         <app-relationship-details
           [relationship]="relationship"
           [network]="network"
@@ -49,8 +49,8 @@ export class Network implements AfterViewInit {
   @ViewChild('myNetwork') networkContainer!: ElementRef;
 
   network?: LittleSisNetwork;
-  entities: Entity[] = [];
-  relationships: Relationship[] = [];
+  entity: Entity | undefined;
+  relationship: Relationship | undefined;
   service: LittlesisService = inject(LittlesisService);
   hidden = true;
 
@@ -60,11 +60,11 @@ export class Network implements AfterViewInit {
     this.network = new LittleSisNetwork(this.networkContainer.nativeElement);
     let that = this;
     this.network.network?.on('selectNode', function (params: any) {
-      that.relationships = [];
+      that.relationship = undefined;
       let node = params.nodes[0];
       if (node) {
         that.service.getEntityById(node).then((entity) => {
-          that.entities = [entity];
+          that.entity = entity;
         });
       }
     });
@@ -73,11 +73,11 @@ export class Network implements AfterViewInit {
       if (node) {
         return; // false alarm, a node was selected
       }
-      that.entities = [];
+      that.entity = undefined;
       let edge = params.edges[0];
       if (edge) {
         that.service.getRelationshipById(edge).then((relationship) => {
-          that.relationships = [relationship];
+          that.relationship = relationship;
         });
       }
     });
@@ -85,11 +85,10 @@ export class Network implements AfterViewInit {
 
   addOrPopulateNode(entity: Entity) {
     this.network?.populateNetwork(entity);
-    this.entities = [entity];
+    this.entity = entity;
   }
 
   toggleButton() {
-    console.log(this.hidden);
     this.hidden = !this.hidden;
   }
 

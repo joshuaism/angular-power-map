@@ -121,7 +121,7 @@ export class LittleSisNetwork {
     network.on('selectNode', function (params: any) {
       console.log('selectNode event:', params);
       let id = params.nodes[0];
-      that.populateNetwork(id);
+      that.expandNode(id);
     });
     network.on('oncontext', function (params: any) {
       params.event.preventDefault();
@@ -129,16 +129,21 @@ export class LittleSisNetwork {
     network.on('dragStart', function (params: any) {
       let id = params.nodes[0];
       if (id) {
-        that.nodeDataSet?.update({ id: id, fixed: false });
+        if (that.network?.isCluster(id)) {
+          that.network?.updateClusteredNode(id, { fixed: false });
+        } else {
+          that.nodeDataSet?.update({ id: id, fixed: false });
+        }
       }
     });
     network.on('dragEnd', function (params: any) {
       let id = params.nodes[0];
       if (id) {
-        that.nodeDataSet?.update({
-          id: id,
-          fixed: true,
-        });
+        if (that.network?.isCluster(id)) {
+          that.network?.updateClusteredNode(id, { fixed: true });
+        } else {
+          that.nodeDataSet?.update({ id: id, fixed: true });
+        }
       }
       network.unselectAll();
     });
@@ -212,9 +217,24 @@ export class LittleSisNetwork {
   collapseNode(id: number) {
     let node = this.nodeDataSet.get(id);
     if (node) {
-      this.nodeDataSet.update({ id: id, expanded: false });
-      //TODO: implement cluster node
+      this.network?.clusterByConnection(id + '', {
+        clusterNodeProperties: { label: node.label + ' cluster', size: 40 },
+      });
     }
+  }
+
+  expandNode(entity: number | Entity) {
+    console.log('attempting to expand node: ', entity);
+    let id = typeof entity === 'number' ? entity : entity.id;
+    if (typeof entity === 'string') {
+      if (this.network?.isCluster(entity)) {
+        this.network.openCluster(entity);
+        return;
+      } else {
+        console.log('something odd may be going on expanding:', entity);
+      }
+    }
+    this.populateNetwork(id);
   }
 
   deleteNodeAndConnectedEdges(id: number) {

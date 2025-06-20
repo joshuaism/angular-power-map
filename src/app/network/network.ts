@@ -105,6 +105,9 @@ export class Network implements AfterViewInit {
         return;
       }
       let node = that.network?.nodeDataSet.get(id as number);
+      // TODO: clustered nodeds aren't in the nodeDataSet
+      // and thus aren't a MyNode node. Figure out how to
+      // populate context menu for them.
       if (node) {
         that.contextNode = node;
         that.x = params.pointer.DOM.x;
@@ -141,7 +144,7 @@ export class Network implements AfterViewInit {
   }
 
   addOrPopulateNode(entity: Entity) {
-    this.network?.populateNetwork(entity);
+    this.network?.expandNode(entity);
     this.entity = entity;
   }
 

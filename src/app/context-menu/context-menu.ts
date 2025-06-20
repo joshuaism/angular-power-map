@@ -14,7 +14,7 @@ export class ContextMenu {
   network = input<LittleSisNetwork>();
 
   expandNode() {
-    this.network()?.populateNetwork(this.node()?.id as number);
+    this.network()?.expandNode(this.node()?.id as number);
     this.contextEnded.emit(true);
   }
 

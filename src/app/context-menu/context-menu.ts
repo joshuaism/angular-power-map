@@ -1,6 +1,6 @@
 import { Component, EventEmitter, input, Output } from '@angular/core';
-import { Entity } from '../entity';
 import { LittleSisNetwork } from '../network';
+import { MyNode } from '../my-node';
 
 @Component({
   selector: 'app-context-menu',
@@ -10,26 +10,21 @@ import { LittleSisNetwork } from '../network';
 })
 export class ContextMenu {
   @Output() contextEnded: EventEmitter<boolean> = new EventEmitter<boolean>();
-  entity = input.required<Entity>();
+  node = input.required<MyNode>();
   network = input<LittleSisNetwork>();
 
   expandNode() {
-    this.network()?.populateNetwork(this.entity()?.id);
+    this.network()?.populateNetwork(this.node()?.id as number);
     this.contextEnded.emit(true);
   }
 
   collapseNode() {
-    this.network()?.collapseNode(this.entity()?.id);
+    this.network()?.collapseNode(this.node()?.id as number);
     this.contextEnded.emit(true);
   }
 
   deleteNode() {
-    this.network()?.deleteNodeAndConnectedEdges(this.entity()?.id);
+    this.network()?.deleteNodeAndConnectedEdges(this.node()?.id as number);
     this.contextEnded.emit(true);
-  }
-
-  isExpanded(entity: Entity) {
-    let node = this.network()?.nodeDataSet.get(entity.id);
-    return node?.expanded;
   }
 }

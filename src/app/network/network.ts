@@ -9,6 +9,7 @@ import { Relationship } from '../relationship';
 import { RelationshipDetails } from '../relationship-details/relationship-details';
 import { EntityDetails } from '../entity-details/entity-details';
 import { ContextMenu } from '../context-menu/context-menu';
+import { MyNode } from '../my-node';
 
 @Component({
   selector: 'app-network',
@@ -49,12 +50,12 @@ import { ContextMenu } from '../context-menu/context-menu';
         <h1>+</h1>
       </div>
     </section>
-    @if(entity) {
+    @if(contextNode) {
     <app-context-menu
       class="oncontext"
       (contextEnded)="dismissContextMenu()"
-      [hidden]="!hasContext"
-      [entity]="entity"
+      [hidden]="!contextNode"
+      [node]="contextNode"
       [network]="network"
       [style]="getPosition()"
     ></app-context-menu>
@@ -73,7 +74,7 @@ export class Network implements AfterViewInit {
 
   x = 0;
   y = 0;
-  hasContext = false;
+  contextNode: MyNode | undefined;
 
   getPosition() {
     return {
@@ -98,17 +99,20 @@ export class Network implements AfterViewInit {
       }
     });
     this.network.network?.on('oncontext', function (params: any) {
-      let node = that.network?.network?.getNodeAt(params.pointer.DOM);
+      let id = that.network?.network?.getNodeAt(params.pointer.DOM);
+      if (!id) {
+        that.dismissContextMenu();
+        return;
+      }
+      let node = that.network?.nodeDataSet.get(id as number);
       if (node) {
-        that.relationship = undefined;
-        that.service.getEntityById(node as number).then((entity) => {
-          that.entity = entity;
-        });
-        that.hasContext = true;
+        that.contextNode = node;
         that.x = params.pointer.DOM.x;
         that.y = params.pointer.DOM.y;
-      } else {
-        that.hasContext = false;
+        that.service.getEntityById(id as number).then((entity) => {
+          that.entity = entity;
+          that.relationship = undefined;
+        });
       }
     });
     this.network.network?.on('click', function (params: any) {
@@ -133,7 +137,7 @@ export class Network implements AfterViewInit {
   }
 
   dismissContextMenu() {
-    this.hasContext = false;
+    this.contextNode = undefined;
   }
 
   addOrPopulateNode(entity: Entity) {

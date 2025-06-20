@@ -8,9 +8,9 @@
     box-shadow: 2px 2px;
   "
 >
-  @if(!isExpanded(entity())) {
+  @if(!node().expanded) {
   <span (click)="expandNode()">expand node</span><br />
-  } @if(isExpanded(entity())) {
+  } @if(node().expanded) {
   <span (click)="collapseNode()">collapse node</span><br />
   }
   <span (click)="deleteNode()">delete node</span>

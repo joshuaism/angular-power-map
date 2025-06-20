@@ -8,10 +8,17 @@ import { EntityAutocomplete } from '../entity-autocomplete/entity-autocomplete';
 import { Relationship } from '../relationship';
 import { RelationshipDetails } from '../relationship-details/relationship-details';
 import { EntityDetails } from '../entity-details/entity-details';
+import { ContextMenu } from '../context-menu/context-menu';
 
 @Component({
   selector: 'app-network',
-  imports: [EntityDetails, RelationshipDetails, EntityAutocomplete, NgClass],
+  imports: [
+    EntityDetails,
+    RelationshipDetails,
+    ContextMenu,
+    EntityAutocomplete,
+    NgClass,
+  ],
   template: `
     <section>
       <app-entity-autocomplete
@@ -42,6 +49,16 @@ import { EntityDetails } from '../entity-details/entity-details';
         <h1>+</h1>
       </div>
     </section>
+    @if(entity) {
+    <app-context-menu
+      class="oncontext"
+      (contextEnded)="dismissContextMenu()"
+      [hidden]="!hasContext"
+      [entity]="entity"
+      [network]="network"
+      [style]="getPosition()"
+    ></app-context-menu>
+    }
   `,
   styleUrls: ['./network.css'],
 })
@@ -53,6 +70,18 @@ export class Network implements AfterViewInit {
   relationship: Relationship | undefined;
   service: LittlesisService = inject(LittlesisService);
   hidden = true;
+
+  x = 0;
+  y = 0;
+  hasContext = false;
+
+  getPosition() {
+    return {
+      position: 'relative',
+      left: this.x + 'px',
+      top: this.y + 'px',
+    };
+  }
 
   constructor() {}
 
@@ -68,6 +97,26 @@ export class Network implements AfterViewInit {
         });
       }
     });
+    this.network.network?.on('oncontext', function (params: any) {
+      let node = that.network?.network?.getNodeAt(params.pointer.DOM);
+      if (node) {
+        that.relationship = undefined;
+        that.service.getEntityById(node as number).then((entity) => {
+          that.entity = entity;
+        });
+        that.hasContext = true;
+        that.x = params.pointer.DOM.x;
+        that.y = params.pointer.DOM.y;
+      } else {
+        that.hasContext = false;
+      }
+    });
+    this.network.network?.on('click', function (params: any) {
+      that.dismissContextMenu();
+    });
+    this.network.network?.on('dragStart', function (params: any) {
+      that.dismissContextMenu();
+    });
     this.network.network?.on('selectEdge', function (params: any) {
       let node = params.nodes[0];
       if (node) {
@@ -81,6 +130,10 @@ export class Network implements AfterViewInit {
         });
       }
     });
+  }
+
+  dismissContextMenu() {
+    this.hasContext = false;
   }
 
   addOrPopulateNode(entity: Entity) {

@@ -1,0 +1,17 @@
+<div
+  style="
+    border: solid 1px gainsboro;
+    padding: 3px;
+    width: 150px;
+    background-color: rgb(249, 249, 249);
+    border-radius: 5px;
+    box-shadow: 2px 2px;
+  "
+>
+  @if(!isExpanded(entity())) {
+  <span (click)="expandNode()">expand node</span><br />
+  } @if(isExpanded(entity())) {
+  <span (click)="collapseNode()">collapse node</span><br />
+  }
+  <span (click)="deleteNode()">delete node</span>
+</div>

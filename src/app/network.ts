@@ -123,6 +123,9 @@ export class LittleSisNetwork {
       let id = params.nodes[0];
       that.populateNetwork(id);
     });
+    network.on('oncontext', function (params: any) {
+      params.event.preventDefault();
+    });
     network.on('dragStart', function (params: any) {
       let id = params.nodes[0];
       if (id) {
@@ -204,6 +207,22 @@ export class LittleSisNetwork {
           }
         }
       });
+  }
+
+  collapseNode(id: number) {
+    let node = this.nodeDataSet.get(id);
+    if (node) {
+      this.nodeDataSet.update({ id: id, expanded: false });
+      //TODO: implement cluster node
+    }
+  }
+
+  deleteNodeAndConnectedEdges(id: number) {
+    this.nodeDataSet.remove(id);
+    let connectedEdges = this.edgeDataSet.get({
+      filter: (edge) => edge.to == id || edge.from == id,
+    });
+    this.edgeDataSet.remove(connectedEdges);
   }
 
   async populateNetwork(entity: number | Entity) {

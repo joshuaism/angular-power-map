@@ -182,7 +182,11 @@ export class LittleSisNetwork {
         width: 4,
       });
     }
-    this.network?.focus(entity.id);
+    this.network?.fit({ nodes: [entity.id, parentId] });
+    this.network?.setSelection({
+      nodes: [entity.id, parentId],
+      edges: [relationship.id],
+    });
   }
 
   populateMissingEdgeTitles(relationships: Relationship[]) {

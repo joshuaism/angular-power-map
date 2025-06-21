@@ -67,6 +67,11 @@ export class LittleSisNetwork {
   DEFAULT_EDGE_TITLE = 'connection';
 
   constructor(container: HTMLElement) {
+    var hoverAndSelectModifications = function (values: any) {
+      values.size = 30;
+      values.width = 8;
+      values.shadowColor = '#7700ff';
+    };
     var options = {
       interaction: {
         hover: true,
@@ -74,6 +79,7 @@ export class LittleSisNetwork {
       nodes: {
         shape: 'dot',
         size: 20,
+        chosen: { label: true, node: hoverAndSelectModifications },
         widthConstraint: { maximum: 120 },
         font: {
           strokeWidth: 3,
@@ -85,6 +91,10 @@ export class LittleSisNetwork {
       edges: {
         arrows: '',
         width: 6,
+        // note: causes typescript exception expected below
+        // may require changes in vis-network type definitions file
+        // see Network.d.ts ln 992
+        chosen: { label: false, edge: hoverAndSelectModifications },
         shadow: true,
         smooth: {
           enabled: true,
@@ -110,6 +120,7 @@ export class LittleSisNetwork {
       nodes: this.nodeDataSet,
       edges: this.edgeDataSet,
     };
+    // @ts-expect-error
     let network = new Network(container, treeData, options);
     this.network = network;
 
@@ -183,10 +194,13 @@ export class LittleSisNetwork {
       });
     }
     this.network?.fit({ nodes: [entity.id, parentId] });
-    this.network?.setSelection({
-      nodes: [entity.id, parentId],
-      edges: [relationship.id],
-    });
+    this.network?.setSelection(
+      {
+        nodes: [entity.id, parentId],
+        edges: [relationship.id],
+      },
+      { highlightEdges: false }
+    );
   }
 
   populateMissingEdgeTitles(relationships: Relationship[]) {

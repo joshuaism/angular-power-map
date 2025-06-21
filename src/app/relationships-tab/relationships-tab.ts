@@ -64,7 +64,7 @@ export class RelationshipsTab implements OnChanges {
 
   getRelationships(entity: Entity) {
     this.service
-      .getRelationshipsByEntityId(this.entity().id, this.selected)
+      .getRelationshipsByEntityId(this.entity().id, this.selected, 'amount')
       .then((relationships) => {
         this.relationships = relationships.sort(
           (a, b) =>

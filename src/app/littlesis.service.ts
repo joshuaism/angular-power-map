@@ -94,6 +94,15 @@ export class LittlesisService {
 
   async getEntitiesByName(name: string): Promise<Entity[]> {
     let url = `https://littlesis.org/api/entities/search?q=${name}`;
+    return this.getEntities(url);
+  }
+
+  async getEntitiesByIds(ids: number[]): Promise<Entity[]> {
+    let url = `https://littlesis.org/api/entities/?ids=${ids.join(',')}`;
+    return this.getEntities(url);
+  }
+
+  private async getEntities(url: string): Promise<Entity[]> {
     return axios.get(url).then(
       (response) => {
         const json = response.data;
@@ -165,11 +174,15 @@ export class LittlesisService {
 
   async getRelationshipsByEntityId(
     id: number,
-    category?: number
+    category?: number,
+    sort?: string
   ): Promise<Relationship[]> {
-    let url = `https://littlesis.org/api/entities/${id}/relationships/?sort=amount&page=1`;
+    let url = `https://littlesis.org/api/entities/${id}/relationships/?page=1&per_page=300`;
     if (category && category > 0 && category <= 12) {
-      url = `https://littlesis.org/api/entities/${id}/relationships/?category_id=${category}&sort=amount&page=1`;
+      url = `https://littlesis.org/api/entities/${id}/relationships/?category_id=${category}&page=1&per_page=300`;
+    }
+    if (sort) {
+      url = url + `&sort=${sort}`;
     }
     return axios.get(url).then(
       (response) => {

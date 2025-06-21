@@ -90,7 +90,7 @@ export class LittleSisNetwork {
       },
       edges: {
         arrows: '',
-        width: 6,
+        width: 4,
         // note: causes typescript exception expected below
         // may require changes in vis-network type definitions file
         // see Network.d.ts ln 992
@@ -252,7 +252,7 @@ export class LittleSisNetwork {
         console.log('something odd may be going on expanding:', entity);
       }
     }
-    this.populateNetwork(id);
+    this.populateNetwork2(id);
   }
 
   deleteNodeAndConnectedEdges(id: number) {
@@ -292,6 +292,19 @@ export class LittleSisNetwork {
       await this.populateConnections(id, category);
     }
     await this.populateConnections(id);
+    this.fillInMissingEdges(id);
+
+    let node = this.nodeDataSet.get(id);
+    node!.populated = true;
+    node!.expanded = true;
+    node!.x = location?.x;
+    node!.y = location?.y;
+    this.nodeDataSet.update(node!);
+
+    this.network?.focus(id);
+  }
+
+  fillInMissingEdges(id: number) {
     this.service
       .getOligrapherRelationships(id, this.nodeDataSet.getIds())
       .then((relationships) => {
@@ -310,15 +323,6 @@ export class LittleSisNetwork {
           });
         this.edgeDataSet.add(edges);
       });
-
-    let node = this.nodeDataSet.get(id);
-    node!.populated = true;
-    node!.expanded = true;
-    node!.x = location?.x;
-    node!.y = location?.y;
-    this.nodeDataSet.update(node!);
-
-    this.network?.focus(id);
   }
 
   private async populateConnections(id: number, category?: number) {
@@ -342,7 +346,6 @@ export class LittleSisNetwork {
               to: c.entity.id,
               color: this.getEdgeColor(c.connection_category),
               title: this.DEFAULT_EDGE_TITLE,
-              width: 4,
             };
           });
         this.nodeDataSet.add(nodes);
@@ -426,5 +429,102 @@ export class LittleSisNetwork {
       };
     }
     return color;
+  }
+
+  async populateNetwork2(entity: number | Entity) {
+    let id = typeof entity === 'number' ? entity : entity.id;
+    this.network?.focus(id);
+    let parent = this.nodeDataSet.get(id);
+    if (parent?.populated) {
+      console.log('already populated');
+      this.network?.focus(id);
+      return;
+    }
+    if (!parent) {
+      if (typeof entity === 'number') {
+        await this.service.getEntityById(id).then((entity) => {
+          let node = this.createNode(entity);
+          this.nodeDataSet.add(node);
+        });
+      } else {
+        let node = this.createNode(entity);
+        this.nodeDataSet.add(node);
+      }
+    }
+    let location = this.network?.getPosition(id);
+    let categories =
+      this.nodeDataSet.get(id)?.type.toUpperCase() === 'PERSON'
+        ? this.PERSON_CATEGORIES
+        : this.ORG_CATEGORIES;
+    await this.service
+      .getRelationshipsByEntityId(id)
+      .then((relationships: Relationship[]) => {
+        relationships = Array.from(new Set(relationships));
+        if (relationships.length <= 80) {
+          console.log(`populating all ${relationships.length} connections`);
+          this.populateEdgesAndNodes(relationships, id, location);
+        } else {
+          console.log(`found ${relationships.length} connections`);
+          let filtered: Relationship[] = [];
+          for (const category of categories) {
+            let firstInCategory = relationships
+              .filter((r: Relationship) => r.category_id === category)
+              .slice(0, 20);
+            console.log(
+              `populating ${firstInCategory.length} category ${category} connections for ${id}`
+            );
+            filtered.push(...firstInCategory);
+          }
+          this.populateEdgesAndNodes(filtered, id, location);
+        }
+      });
+
+    let node = this.nodeDataSet.get(id);
+    node!.populated = true;
+    node!.expanded = true;
+    node!.x = location?.x;
+    node!.y = location?.y;
+    this.nodeDataSet.update(node!);
+
+    this.network?.focus(id);
+  }
+
+  populateEdgesAndNodes(
+    relationships: Relationship[],
+    id: number,
+    location?: { x: number; y: number }
+  ) {
+    let ids = relationships.map((r) =>
+      r.entity1_id == id ? r.entity2_id : r.entity1_id
+    );
+    let edgeIds = this.edgeDataSet.getIds();
+    let edges = relationships
+      .filter((r) => !edgeIds.includes(r.id))
+      .map((r) => {
+        return {
+          id: r.id,
+          from: r.entity1_id,
+          to: r.entity2_id,
+          color: this.getEdgeColor(r.category_id),
+          title: r.description,
+        };
+      });
+    let uniqueEdges = [
+      ...new Map(edges.map((edge) => [edge.id, edge])).values(),
+    ];
+    this.edgeDataSet.add(uniqueEdges);
+    this.service.getEntitiesByIds(ids).then((entities) => {
+      let nodeIds = this.nodeDataSet.getIds();
+      let nodes = entities
+        .filter((entity) => !nodeIds.includes(entity.id))
+        .map((entity) => this.createNode(entity, location));
+      this.nodeDataSet.add(nodes);
+    });
+
+    this.fillInMissingEdges(id);
+  }
+
+  uniqBy(a: any, key: any) {
+    return [...new Map(a.map((x: any) => [key(x), x])).values()];
   }
 }

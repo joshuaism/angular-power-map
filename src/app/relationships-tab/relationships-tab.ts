@@ -1,4 +1,4 @@
-import { Component, inject, input, OnInit } from '@angular/core';
+import { Component, inject, input, OnChanges } from '@angular/core';
 import { Entity } from '../entity';
 import { Relationship } from '../relationship';
 import { LittleSisNetwork } from '../network';
@@ -14,7 +14,10 @@ import { FormsModule } from '@angular/forms';
   template: `
     <mat-form-field>
       <mat-label>Category</mat-label>
-      <mat-select [(value)]="selected" (selectionChange)="getRelationships()">
+      <mat-select
+        [(value)]="selected"
+        (selectionChange)="getRelationships(entity())"
+      >
         <mat-option [value]="0">All Categories</mat-option>
         <mat-option [value]="1">Executive Roles</mat-option>
         <mat-option [value]="2">Schools Attended</mat-option>
@@ -45,7 +48,7 @@ import { FormsModule } from '@angular/forms';
   `,
   styleUrl: './relationships-tab.css',
 })
-export class RelationshipsTab implements OnInit {
+export class RelationshipsTab implements OnChanges {
   entity = input.required<Entity>();
   network = input<LittleSisNetwork>();
 
@@ -54,11 +57,12 @@ export class RelationshipsTab implements OnInit {
   selected = 0;
   relationships: Relationship[] = [];
 
-  ngOnInit(): void {
-    this.getRelationships();
+  ngOnChanges(): void {
+    this.selected = 0;
+    this.getRelationships(this.entity());
   }
 
-  getRelationships() {
+  getRelationships(entity: Entity) {
     this.service
       .getRelationshipsByEntityId(this.entity().id, this.selected)
       .then((relationships) => {

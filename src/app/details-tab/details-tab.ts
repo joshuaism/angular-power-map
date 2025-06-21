@@ -63,7 +63,7 @@ export class DetailsTab {
   getFecUrl(): string {
     return `https://joshuaism.github.io/react-fec-client?name=${
       this.entity().name
-    }&amp;from_year=1980`;
+    }&from_year=1980`;
   }
 
   getEmployerFecUrl(): string {

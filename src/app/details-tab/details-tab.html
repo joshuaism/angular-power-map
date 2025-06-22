@@ -1,0 +1,152 @@
+<h1
+  style="cursor: pointer"
+  title="center map on {{ entity().name }}"
+  (click)="focus(entity().id)"
+>
+  {{ entity().name }}
+</h1>
+<h4>{{ entity().blurb }}</h4>
+<div class="scrollable">
+  @if (entity().aliases && entity().aliases.length > 0) {
+    <h4>
+      aka:
+      @for (alias of entity().aliases; track alias) {
+        <span>{{ alias }}</span>
+        @if (!$last) {
+          <span>, </span>
+        }
+      }
+    </h4>
+  }
+  @if (entity().extensions["ElectedRepresentative"]) {
+    @if (entity().extensions["ElectedRepresentative"]["govtrack_id"]; as id) {
+      <a
+        href="https://www.govtrack.us/congress/members/{{ id }}"
+        target="_blank"
+        >govtrack.us</a
+      >
+      <br />
+    }
+    @if (entity().extensions["ElectedRepresentative"]["bioguide_id"]; as id) {
+      <a
+        href="https://bioguide.congress.gov/search/bio/{{ id }}"
+        target="_blank"
+        >bioguide</a
+      >
+      <br />
+    }
+  }
+  @if (entity().extensions["PoliticalCandidate"]) {
+    @if (entity().extensions["PoliticalCandidate"]["senate_fec_id"]; as id) {
+      <a href="https://www.fec.gov/data/candidate/{{ id }}" target="_blank"
+        >FEC Candidate For Senate Profile</a
+      >
+      <br />
+    }
+    @if (entity().extensions["PoliticalCandidate"]["house_fec_id"]; as id) {
+      <a href="https://www.fec.gov/data/candidate/{{ id }}" target="_blank"
+        >FEC Candidate For House Profile</a
+      >
+      <br />
+    }
+    @if (entity().extensions["PoliticalCandidate"]["pres_fec_id"]; as id) {
+      <a href="https://www.fec.gov/data/candidate/{{ id }}" target="_blank"
+        >FEC Candidate for President Profile</a
+      >
+      <br />
+    }
+  }
+  @if (entity().extensions["Lobbyist"]) {
+    @if (entity().extensions["Lobbyist"]["lda_registrant_id"]; as id) {
+      <a
+        href="https://lda.senate.gov/filings/public/contribution/search/?registrant={{
+          id
+        }}&search=search"
+        target="_blank"
+        >Lobbying Disclosures
+      </a>
+      <br />
+    } @else {
+      <a
+        href="https://lda.senate.gov/filings/public/contribution/search/?registrant_lobbyist={{
+          entity().name
+        }}&search=search"
+        target="_blank"
+        >Lobbying Disclosures Search
+      </a>
+      <br />
+    }
+  }
+  @if (entity().extensions["Org"]) {
+    @if (entity().extensions["Org"]["lda_registrant_id"]; as id) {
+      <a
+        href="https://lda.senate.gov/filings/public/contribution/search/?registrant={{
+          id
+        }}&search=search"
+        target="_blank"
+        >Lobbying Disclosures
+      </a>
+      <br />
+    }
+  }
+  @if (entity().extensions["PublicCompany"]) {
+    @if (entity().extensions["PublicCompany"]["sec_cik"]; as id) {
+      <a href="https://www.sec.gov/edgar/browse/?CIK={{ id }}" target="_blank"
+        >SEC Filings
+      </a>
+      <br />
+    }
+    @if (entity().extensions["PublicCompany"]["ticker"]; as id) {
+      <a href="https://finance.yahoo.com/quote/{{ id }}" target="_blank"
+        >Stock Ticker at Yahoo! finance
+      </a>
+      <br />
+    }
+  }
+  @if (entity().extensions["BusinessPerson"]) {
+    @if (entity().extensions["BusinessPerson"]["sec_cik"]; as id) {
+      <a href="https://www.sec.gov/edgar/browse/?CIK={{ id }}" target="_blank"
+        >SEC Filings
+      </a>
+      <br />
+    }
+  }
+  <a href="{{ getFecUrl() }}" target="_blank">FEC Search</a>
+  <br />
+  @if (entity().types[0].toUpperCase() !== "PERSON") {
+    <a href="{{ getEmployerFecUrl() }}" target="_blank"
+      >FEC Search: Employee Contributions</a
+    >
+    <br />
+  }
+  @if (entity().extensions["PoliticalFundraising"]) {
+    @if (entity().extensions["PoliticalFundraising"]["fec_id"]; as id) {
+      <a
+        href="https://joshuaism.github.io/react-fec-client?committee={{ id }}"
+        target="_blank"
+        >FEC Search: Committee Donors
+      </a>
+      <br />
+    }
+  }
+  @if (entity().website) {
+    <a href="{{ entity().website }}" target="_blank">
+      {{ entity().name }} website
+    </a>
+    <br />
+  }
+  <p>{{ entity().summary }}</p>
+  <h4>
+    @for (type of entity().types; track type) {
+      {{ type }}<br />
+    }
+  </h4>
+  <p>last updated: {{ entity().updated_at }}</p>
+  <a href="{{ entity().link }}" target="_blank">source</a>
+  <br />
+  <a
+    href="https://littlesis.org/api/entities/{{ entity().id }}?details=true"
+    target="_blank"
+    >data
+  </a>
+</div>

@@ -44,7 +44,7 @@ export class LittlesisService {
   }
 
   async getEntityById(id: number): Promise<Entity> {
-    let url = `https://littlesis.org/api/entities/${id}`;
+    let url = `https://littlesis.org/api/entities/${id}?details=true`;
     return axios.get(url).then(
       (response) => {
         const json = response.data;
@@ -62,34 +62,49 @@ export class LittlesisService {
     return axios.get(url).then(
       (response) => {
         const json = response.data;
-        let relationship = json.data.attributes;
-        relationship.entity1 = json.included[0].attributes;
-        relationship.entity2 = json.included[1].attributes;
-        relationship.link = json.data.self;
-        let amount = relationship.amount?.toLocaleString(undefined, {
-          style: 'currency',
-          currency: relationship.currency,
-        });
-        let description = relationship.description;
-        if (amount && relationship.category_id === 5) {
-          description = description.replace('money', amount);
-        }
-        if (amount && relationship.category_id === 6) {
-          description = description.replace('did/do', `did ${amount} in`);
-        }
-        relationship.description = description;
-        relationship.start_date = relationship.start_date
-          ? this.formatDate(relationship.start_date)
-          : 'the dawn of time';
-        relationship.end_date = relationship.end_date
-          ? this.formatDate(relationship.end_date)
-          : 'present';
+        json.data.attributes = this.createRelationship(
+          json.data.attributes,
+          json.data.self,
+          json.included[0],
+          json.included[1]
+        );
         return json.data.attributes ?? {};
       },
       (error) => {
         this.defaultCatchBlock(url, error);
       }
     );
+  }
+
+  createRelationship(
+    data: any,
+    link: string,
+    entity1?: any,
+    entity2?: any
+  ): Relationship {
+    let relationship = data;
+    if (entity1) relationship.entity1 = this.createEntity(entity1);
+    if (entity2) relationship.entity2 = this.createEntity(entity2);
+    relationship.link = link;
+    let amount = relationship.amount?.toLocaleString(undefined, {
+      style: 'currency',
+      currency: relationship.currency,
+    });
+    let description = relationship.description;
+    if (amount && relationship.category_id === 5) {
+      description = description.replace('money', amount);
+    }
+    if (amount && relationship.category_id === 6) {
+      description = description.replace('did/do', `did ${amount} in`);
+    }
+    relationship.description = description;
+    relationship.start_date = relationship.start_date
+      ? this.formatDate(relationship.start_date)
+      : 'the dawn of time';
+    relationship.end_date = relationship.end_date
+      ? this.formatDate(relationship.end_date)
+      : 'present';
+    return relationship;
   }
 
   async getEntitiesByName(name: string): Promise<Entity[]> {
@@ -159,6 +174,7 @@ export class LittlesisService {
         const json = response.data;
         return (
           json.map((relationship: any) => {
+            relationship.id = parseInt(relationship.id);
             relationship.entity1_id = relationship.node1_id;
             relationship.entity2_id = relationship.node2_id;
             relationship.title = 'connection';
@@ -187,26 +203,16 @@ export class LittlesisService {
     return axios.get(url).then(
       (response) => {
         const json = response.data;
+        // remove duplicates
+        let uniqueJson: any = [
+          ...new Map(json.data.map((r: any) => [r.attributes.id, r])).values(),
+        ];
         return (
-          json.data.map((relationship: any) => {
-            relationship.attributes.link = relationship.self;
-            let amount = relationship.attributes.amount?.toLocaleString(
-              undefined,
-              {
-                style: 'currency',
-                currency: relationship.attributes.currency,
-              }
+          uniqueJson.map((relationship: any) => {
+            relationship.attributes = this.createRelationship(
+              relationship.attributes,
+              relationship.self
             );
-            let description = relationship.attributes.description;
-            if (amount) {
-              if (relationship.attributes.category_id === 5) {
-                description = description.replace('money', amount);
-              }
-              if (relationship.attributes.category_id === 6) {
-                description = description.replace('did/do', `did ${amount} in`);
-              }
-              relationship.attributes.description = description;
-            }
             return relationship.attributes;
           }) ?? []
         );

@@ -252,7 +252,7 @@ export class LittleSisNetwork {
         console.log('something odd may be going on expanding:', entity);
       }
     }
-    this.populateNetwork2(id);
+    this.populateNetwork(id);
   }
 
   deleteNodeAndConnectedEdges(id: number) {
@@ -261,47 +261,6 @@ export class LittleSisNetwork {
       filter: (edge) => edge.to == id || edge.from == id,
     });
     this.edgeDataSet.remove(connectedEdges);
-  }
-
-  async populateNetwork(entity: number | Entity) {
-    let id = typeof entity === 'number' ? entity : entity.id;
-    this.network?.focus(id);
-    let parent = this.nodeDataSet.get(id);
-    if (parent?.populated) {
-      console.log('already populated');
-      this.network?.focus(id);
-      return;
-    }
-    if (!parent) {
-      if (typeof entity === 'number') {
-        await this.service.getEntityById(id).then((entity) => {
-          let node = this.createNode(entity);
-          this.nodeDataSet.add(node);
-        });
-      } else {
-        let node = this.createNode(entity);
-        this.nodeDataSet.add(node);
-      }
-    }
-    let location = this.network?.getPosition(id);
-    let categories =
-      this.nodeDataSet.get(id)?.type.toUpperCase() === 'PERSON'
-        ? this.PERSON_CATEGORIES
-        : this.ORG_CATEGORIES;
-    for (const category of categories) {
-      await this.populateConnections(id, category);
-    }
-    await this.populateConnections(id);
-    this.fillInMissingEdges(id);
-
-    let node = this.nodeDataSet.get(id);
-    node!.populated = true;
-    node!.expanded = true;
-    node!.x = location?.x;
-    node!.y = location?.y;
-    this.nodeDataSet.update(node!);
-
-    this.network?.focus(id);
   }
 
   fillInMissingEdges(id: number) {
@@ -321,34 +280,6 @@ export class LittleSisNetwork {
               width: 4,
             };
           });
-        this.edgeDataSet.add(edges);
-      });
-  }
-
-  private async populateConnections(id: number, category?: number) {
-    let location = this.network?.getPosition(id);
-    await this.service
-      .getConnectionsByEntityId(id, category)
-      .then((connections) => {
-        let nodeIds = this.nodeDataSet.getIds();
-        let nodes = connections
-          .filter((c: Connection) => !nodeIds.includes(c.entity.id))
-          .map((c: Connection) => {
-            return this.createNode(c.entity, location);
-          });
-        let edgeIds = this.edgeDataSet.getIds();
-        let edges = connections
-          .filter((c: Connection) => !edgeIds.includes(c.connection_id))
-          .map((c: Connection) => {
-            return {
-              id: c.connection_id,
-              from: c.parent_id,
-              to: c.entity.id,
-              color: this.getEdgeColor(c.connection_category),
-              title: this.DEFAULT_EDGE_TITLE,
-            };
-          });
-        this.nodeDataSet.add(nodes);
         this.edgeDataSet.add(edges);
       });
   }
@@ -431,7 +362,7 @@ export class LittleSisNetwork {
     return color;
   }
 
-  async populateNetwork2(entity: number | Entity) {
+  async populateNetwork(entity: number | Entity) {
     let id = typeof entity === 'number' ? entity : entity.id;
     this.network?.focus(id);
     let parent = this.nodeDataSet.get(id);
@@ -489,7 +420,7 @@ export class LittleSisNetwork {
     this.network?.focus(id);
   }
 
-  populateEdgesAndNodes(
+  async populateEdgesAndNodes(
     relationships: Relationship[],
     id: number,
     location?: { x: number; y: number }
@@ -509,10 +440,7 @@ export class LittleSisNetwork {
           title: r.description,
         };
       });
-    let uniqueEdges = [
-      ...new Map(edges.map((edge) => [edge.id, edge])).values(),
-    ];
-    this.edgeDataSet.add(uniqueEdges);
+    await this.edgeDataSet.add(edges);
     this.service.getEntitiesByIds(ids).then((entities) => {
       let nodeIds = this.nodeDataSet.getIds();
       let nodes = entities
@@ -522,9 +450,5 @@ export class LittleSisNetwork {
     });
 
     this.fillInMissingEdges(id);
-  }
-
-  uniqBy(a: any, key: any) {
-    return [...new Map(a.map((x: any) => [key(x), x])).values()];
   }
 }

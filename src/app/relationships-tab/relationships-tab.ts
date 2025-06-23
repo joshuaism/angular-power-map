@@ -35,15 +35,16 @@ import { FormsModule } from '@angular/forms';
     </mat-form-field>
     <h4>{{ relationships.length }} relationships</h4>
     <div class="scrollable">
-      @for(relationship of relationships; track relationship.id) {
-      <p
-        (click)="focus(relationship)"
-        style="cursor:pointer;"
-        title="add this relationship to the map"
-      >
-        {{ relationship.description }}
-      </p>
+      @for (relationship of relationships; track relationship.id) {
+        <p
+          (click)="focus(relationship)"
+          style="cursor:pointer;"
+          title="add this relationship to the map"
+        >
+          {{ relationship.description }}
+        </p>
       }
+      <p>eof</p>
     </div>
   `,
   styleUrl: './relationships-tab.css',
@@ -68,7 +69,7 @@ export class RelationshipsTab implements OnChanges {
       .then((relationships) => {
         this.relationships = relationships.sort(
           (a, b) =>
-            b.amount - a.amount || a.description.localeCompare(b.description)
+            b.amount - a.amount || a.description.localeCompare(b.description),
         );
         this.network()?.populateMissingEdgeTitles(this.relationships);
       });
@@ -83,7 +84,7 @@ export class RelationshipsTab implements OnChanges {
       this.network()?.populateSingleNodeAndEdge(
         entity,
         relationship,
-        this.entity().id
+        this.entity().id,
       );
     });
   }

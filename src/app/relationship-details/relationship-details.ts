@@ -19,12 +19,14 @@ import { Relationship } from '../relationship';
         {{ relationship().start_date }} &ndash; {{ relationship().end_date }}
       </p>
       @if (relationship().goods) {
-      <p style="color:red">has goods!</p>
-      } @if (relationship().category_attributes) {
-      <p style="color:red">has category attributes!</p>
+        <p style="color:red">has goods!</p>
+      }
+      @if (relationship().category_attributes) {
+        <p style="color:red">has category attributes!</p>
       }
       <p>last updated: {{ relationship().updated_at }}</p>
       <a href="{{ relationship().link }}" target="_blank">source</a>
+      <p>eof</p>
     </div>
   `,
   styleUrl: './relationship-details.css',

@@ -1,5 +1,5 @@
 .scrollable {
-  max-height: 70vh;
+  max-height: 60vb;
   padding-right: 3em;
   overflow-y: scroll;
 }

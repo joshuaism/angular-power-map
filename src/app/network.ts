@@ -175,7 +175,7 @@ export class LittleSisNetwork {
   populateSingleNodeAndEdge(
     entity: Entity,
     relationship: Relationship,
-    parentId: number
+    parentId: number,
   ) {
     let node = this.nodeDataSet.get(entity.id);
     let edge = this.edgeDataSet.get(relationship.id);
@@ -199,7 +199,7 @@ export class LittleSisNetwork {
         nodes: [entity.id, parentId],
         edges: [relationship.id],
       },
-      { highlightEdges: false }
+      { highlightEdges: false },
     );
   }
 
@@ -224,7 +224,7 @@ export class LittleSisNetwork {
             edge.title = relationship.description;
             edge.color = this.getEdgeColor(relationship.category_id);
             console.log(
-              `populateMissingEdgeTitles: ${edge.id} title updated to ${edge.title}`
+              `populateMissingEdgeTitles: ${edge.id} title updated to ${edge.title}`,
             );
             this.edgeDataSet.update(edge);
           }
@@ -288,7 +288,7 @@ export class LittleSisNetwork {
     entity: Entity,
     location?: { x: number; y: number },
     populated = false,
-    expanded = false
+    expanded = false,
   ): MyNode {
     // nodes with the exact same location stack on top of each other instead
     // of being repelled by the physics simulation, so introduce some noise
@@ -402,7 +402,7 @@ export class LittleSisNetwork {
               .filter((r: Relationship) => r.category_id === category)
               .slice(0, 20);
             console.log(
-              `populating ${firstInCategory.length} category ${category} connections for ${id}`
+              `populating ${firstInCategory.length} category ${category} connections for ${id}`,
             );
             filtered.push(...firstInCategory);
           }
@@ -423,10 +423,10 @@ export class LittleSisNetwork {
   async populateEdgesAndNodes(
     relationships: Relationship[],
     id: number,
-    location?: { x: number; y: number }
+    location?: { x: number; y: number },
   ) {
     let ids = relationships.map((r) =>
-      r.entity1_id == id ? r.entity2_id : r.entity1_id
+      r.entity1_id == id ? r.entity2_id : r.entity1_id,
     );
     let edgeIds = this.edgeDataSet.getIds();
     let edges = relationships

@@ -8,10 +8,21 @@
     box-shadow: 2px 2px;
   "
 >
-  @if(!node().expanded) {
-  <span (click)="expandNode()">expand node</span><br />
-  } @if(node().expanded) {
-  <span (click)="collapseNode()">collapse node</span><br />
+  @if (isNode(obj())) {
+    @if (!isExpandedNode(obj())) {
+      <span (click)="expandNode()">expand node</span><br />
+    }
+    @if (isExpandedNode(obj())) {
+      <span (click)="collapseNode()">collapse node</span><br />
+    }
+    <span (click)="deleteNode()">delete node</span><br />
   }
-  <span (click)="deleteNode()">delete node</span>
+  @if (isEdge(obj())) {
+    <span
+      ><a href="{{ getRelationshipLink() }}" target="_blank"
+        >view source</a
+      ></span
+    ><br />
+    <span (click)="deleteEdge()">delete edge</span><br />
+  }
 </div>

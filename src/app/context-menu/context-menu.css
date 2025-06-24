@@ -5,3 +5,8 @@ span {
 span:hover {
   background-color: gainsboro;
 }
+
+a {
+  color: inherit;
+  text-decoration: inherit;
+}

@@ -194,13 +194,25 @@ export class LittleSisNetwork {
       });
     }
     this.network?.fit({ nodes: [entity.id, parentId] });
-    this.network?.setSelection(
-      {
-        nodes: [entity.id, parentId],
-        edges: [relationship.id],
-      },
-      { highlightEdges: false },
-    );
+    this.selectRelationship(relationship);
+  }
+
+  selectRelationship(relationship: Relationship) {
+    if (
+      this.nodeDataSet.get(relationship.entity1_id) &&
+      this.nodeDataSet.get(relationship.entity2_id) &&
+      this.edgeDataSet.get(relationship.id)
+    ) {
+      this.network?.setSelection(
+        {
+          nodes: [relationship.entity1_id, relationship.entity2_id],
+          edges: [relationship.id],
+        },
+        { highlightEdges: false },
+      );
+    } else {
+      this.network?.unselectAll();
+    }
   }
 
   populateMissingEdgeTitles(relationships: Relationship[]) {

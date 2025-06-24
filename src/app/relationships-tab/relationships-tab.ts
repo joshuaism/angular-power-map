@@ -38,6 +38,7 @@ import { FormsModule } from '@angular/forms';
       @for (relationship of relationships; track relationship.id) {
         <p
           (click)="focus(relationship)"
+          (mouseenter)="selectRelationship(relationship)"
           style="cursor:pointer;"
           title="add this relationship to the map"
         >
@@ -73,6 +74,10 @@ export class RelationshipsTab implements OnChanges {
         );
         this.network()?.populateMissingEdgeTitles(this.relationships);
       });
+  }
+
+  selectRelationship(relationship: Relationship) {
+    this.network()?.selectRelationship(relationship);
   }
 
   focus(relationship: Relationship) {

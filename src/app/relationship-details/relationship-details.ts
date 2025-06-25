@@ -25,7 +25,13 @@ import { Relationship } from '../relationship';
         <p style="color:red">has category attributes!</p>
       }
       <p>last updated: {{ relationship().updated_at }}</p>
-      <a href="{{ relationship().link }}" target="_blank">source</a>
+      <a href="{{ relationship().link }}" target="littlesistab">source</a>
+      <br />
+      <a
+        href="{https://littlesis.org/api/relationships/{{ relationship().id }}}"
+        target="_blank"
+        >data
+      </a>
       <p>eof</p>
     </div>
   `,

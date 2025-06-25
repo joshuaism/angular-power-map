@@ -36,4 +36,8 @@ export class ContextMenu {
     );
     this.contextEnded.emit(true);
   }
+
+  dismissContextMenu() {
+    this.contextEnded.emit(true);
+  }
 }

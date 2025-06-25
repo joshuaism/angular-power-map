@@ -10,7 +10,10 @@
 >
   @if (context().entity) {
     <span
-      ><a href="{{ context().entity?.link }}" target="littlesistab"
+      ><a
+        (click)="dismissContextMenu()"
+        href="{{ context().entity?.link }}"
+        target="littlesistab"
         >view source</a
       ></span
     ><br />
@@ -26,7 +29,10 @@
   }
   @if (context().relationship) {
     <span
-      ><a href="{{ context().relationship?.link }}" target="littlesistab"
+      ><a
+        (click)="dismissContextMenu()"
+        href="{{ context().relationship?.link }}"
+        target="littlesistab"
         >view source</a
       ></span
     ><br />

@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build --base-href 'https://joshuaism.github.io/angular-power-map/'",
+    "build": "ng build --base-href https://joshuaism.github.io/angular-power-map/",
     "deploy": "npx angular-cli-ghpages --dir=dist/power-map/browser",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"

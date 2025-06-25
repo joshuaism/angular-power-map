@@ -8,25 +8,25 @@
     box-shadow: 2px 2px;
   "
 >
-  @if (entity()) {
+  @if (context().entity) {
     <span
-      ><a href="{{ entity()?.link }}" target="littlesistab"
+      ><a href="{{ context().entity?.link }}" target="littlesistab"
         >view source</a
       ></span
     ><br />
   }
-  @if (node()) {
-    @if (!node()?.expanded) {
+  @if (context().node) {
+    @if (!context().node?.expanded) {
       <span (click)="expandNode()">expand node</span><br />
     }
-    @if (node()?.expanded) {
+    @if (context().node?.expanded) {
       <span (click)="collapseNode()">collapse node</span><br />
     }
     <span (click)="deleteNode()">delete node</span><br />
   }
-  @if (relationship()) {
+  @if (context().relationship) {
     <span
-      ><a href="{{ relationship()?.link }}" target="littlesistab"
+      ><a href="{{ context().relationship?.link }}" target="littlesistab"
         >view source</a
       ></span
     ><br />

@@ -10,7 +10,6 @@ import { RelationshipDetails } from '../relationship-details/relationship-detail
 import { EntityDetails } from '../entity-details/entity-details';
 import { ContextMenu } from '../context-menu/context-menu';
 import { MyNode } from '../my-node';
-import { Edge } from 'vis-network';
 
 @Component({
   selector: 'app-network',
@@ -52,12 +51,14 @@ import { Edge } from 'vis-network';
         <h1>+</h1>
       </div>
     </section>
-    @if (contextObj) {
+    @if (hasContext) {
       <app-context-menu
         class="oncontext"
         (contextEnded)="dismissContextMenu()"
-        [hidden]="!contextObj"
-        [obj]="contextObj"
+        [hidden]="!hasContext"
+        [node]="contextNode"
+        [entity]="entity"
+        [relationship]="relationship"
         [network]="network"
         [style]="getPosition()"
       ></app-context-menu>
@@ -76,7 +77,8 @@ export class Network implements AfterViewInit {
 
   x = 0;
   y = 0;
-  contextObj: MyNode | Relationship | undefined;
+  contextNode: MyNode | undefined;
+  hasContext = false;
 
   getPosition() {
     return {
@@ -108,7 +110,8 @@ export class Network implements AfterViewInit {
         // and thus aren't a MyNode node. Figure out how to
         // populate context menu for them.
         if (node) {
-          that.contextObj = node;
+          that.contextNode = node;
+          that.hasContext = true;
           that.x = params.pointer.DOM.x;
           that.y = params.pointer.DOM.y;
           that.service.getEntityById(id as number).then((entity) => {
@@ -124,12 +127,13 @@ export class Network implements AfterViewInit {
         if (edge) {
           that.x = params.pointer.DOM.x;
           that.y = params.pointer.DOM.y;
+          that.contextNode = undefined;
+          that.hasContext = true;
           that.service
             .getRelationshipById(id as number)
             .then((relationship) => {
               that.entity = undefined;
               that.relationship = relationship;
-              that.contextObj = relationship;
             });
         }
         return;
@@ -158,7 +162,8 @@ export class Network implements AfterViewInit {
   }
 
   dismissContextMenu() {
-    this.contextObj = undefined;
+    this.contextNode = undefined;
+    this.hasContext = false;
   }
 
   addOrPopulateNode(entity: Entity) {

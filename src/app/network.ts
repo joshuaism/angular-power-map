@@ -197,6 +197,37 @@ export class LittleSisNetwork {
     this.selectRelationship(relationship);
   }
 
+  async addAllRelationships(relationships: Relationship[], parentId: number) {
+    let location = this.network?.getPosition(parentId);
+    let existingNodeIds = this.nodeDataSet.getIds();
+    let entityIds = relationships
+      .map((r) => {
+        return r.entity1_id === parentId ? r.entity2_id : r.entity1_id;
+      })
+      .filter((id) => !existingNodeIds?.includes(id));
+    let existingRelationshipIds = this.edgeDataSet.getIds();
+    let newRelationships = relationships.filter(
+      (r) => !existingRelationshipIds?.includes(r.id),
+    );
+    let newEntities = await this.service.getEntitiesByIds(entityIds);
+    let newNodes = newEntities.map((entity) => {
+      return this.createNode(entity, location);
+    });
+    let newEdges = newRelationships.map((relationship) => {
+      return {
+        id: relationship.id,
+        from: relationship.entity1_id,
+        to: relationship.entity2_id,
+        title: relationship.description,
+        color: this.getEdgeColor(relationship.category_id),
+        width: 4,
+      };
+    });
+    this.nodeDataSet.add(newNodes);
+    this.edgeDataSet.add(newEdges);
+    this.network?.fit({ nodes: entityIds });
+  }
+
   selectRelationship(relationship: Relationship) {
     if (
       this.nodeDataSet.get(relationship.entity1_id) &&

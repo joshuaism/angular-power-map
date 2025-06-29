@@ -34,6 +34,7 @@ import { FormsModule } from '@angular/forms';
       </mat-select>
     </mat-form-field>
     <h4>{{ relationships.length }} relationships</h4>
+    <button (click)="addAll()">Add All</button><br />
     <div class="scrollable">
       @for (relationship of relationships; track relationship.id) {
         <p
@@ -92,5 +93,9 @@ export class RelationshipsTab implements OnChanges {
         this.entity().id,
       );
     });
+  }
+
+  addAll() {
+    this.network()?.addAllRelationships(this.relationships, this.entity().id);
   }
 }
